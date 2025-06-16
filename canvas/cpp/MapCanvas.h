@@ -4,6 +4,10 @@
 #include <map_engine_dll_exports.h>
 #include <geos.h>
 #include <iostream>
+#include <string>
+#include <SkSurface.h>
+#include <SkCanvas.h>
+#include <opencv4/opencv2/opencv.hpp>
 
 /**
  * @class MapCanvas
@@ -23,14 +27,25 @@ public:
     void setDotsPerMM(double dotsPerMM);
     void setCenter(double x, double y);
     void setScale(double scale);
+    void setFormat(const std::string& format);
 
-    void begin();
-    void end();
+    void draw(const geos::geom::Geometry* geom);
+    void draw(const geos::geom::Point* geom);
+    void draw(const geos::geom::LineString* geom);
+    void draw(const geos::geom::Polygon* geom);
+    void draw(const geos::geom::GeometryCollection* geom);
 
+
+
+    bool begin();
+    bool end();
+
+    char* data(size_t& len);
     void log();
 
 protected:
     void recalculateMapParameters();
+    std::string createUUID();
 
 private:
 
@@ -39,6 +54,12 @@ private:
     double _dotsPerMM;
     double _centerX, _centerY;
     double _scale;
+    sk_sp<SkSurface> _surface;
+    SkCanvas* _canvas;
+    std::string _format;
+    std::string _filename;
+
+    cv::Mat _transformMatrix;
 
 };
 

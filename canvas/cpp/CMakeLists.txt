@@ -4,7 +4,11 @@ project(mapcanvas LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+if(UNIX)
+    set(ENV{PKG_CONFIG_PATH} "/usr/local/pgsql/lib/pkgconfig:/usr/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
+elseif(WIN32)
+    set(ENV{PKG_CONFIG_PATH} "C:\\local\\lib\\pkgconfig;$ENV{PKG_CONFIG_PATH}")
+endif()
 # add_compile_options( -Wextra -Wpedantic -Wno-unused-result)
 
 
@@ -13,6 +17,8 @@ pkg_check_modules(JSON_C REQUIRED json-c)
 # pkg_check_modules(CAIRO REQUIRED cairo)
 pkg_check_modules(GEOS REQUIRED geos)
 pkg_check_modules(SKIA REQUIRED skia)
+pkg_check_modules(UUID REQUIRED ossp-uuid)
+pkg_check_modules(OPENCV4 REQUIRED opencv4)
 
 # execute_process(COMMAND  pg_config --includedir
 #     OUTPUT_VARIABLE PG_INC_DIR
@@ -30,10 +36,12 @@ pkg_check_modules(SKIA REQUIRED skia)
 
 list(APPEND HEADERS    
   MapCanvas.h
+  Affine.h
 )
 
 list(APPEND SOURCES 
   MapCanvas.cpp
+  Affine.cpp
 )
 
 add_library(mapcanvas SHARED
@@ -47,6 +55,8 @@ target_link_libraries(mapcanvas
   ${JSON_C_LIBRARIES}
   ${GEOS_LIBRARIES}
   ${SKIA_LIBRARIES}
+  ${UUID_LIBRARIES}
+  ${OPENCV4_LIBRARIES}
   geos
 )
 target_compile_definitions(mapcanvas PRIVATE AS_LIBRARY)
@@ -56,16 +66,25 @@ target_include_directories(mapcanvas PUBLIC
   ${JSON_C_INCLUDE_DIRS}
   ${GEOS_INCLUDE_DIRS}
   ${SKIA_INCLUDE_DIRS}
+  ${UUID_INCLUDE_DIRS}
+  ${OPENCV4_INCLUDE_DIRS}
   ${CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES}
 )
 
+
 target_link_directories(mapcanvas PUBLIC
+  ${JSON_C_LIBRARY_DIRS}
   ${GEOS_LIBRARY_DIRS}
   ${SKIA_LIBRARY_DIRS}
+  ${UUID_LIBRARY_DIRS}
+  ${OPENCV4_LIBRARY_DIRS}
 )
 target_compile_options(mapcanvas PUBLIC 
   ${JSON_C_CFLAGS_OTHER}
+  ${GEOS_CFLAGS_OTHER}
+  ${JSON_C_CFLAGS_OTHER}
   ${SKIA_CFLAGS_OTHER}
+  ${OPENCV4_LIBRARY_DIRS}
 )
 
 include(GNUInstallDirs)

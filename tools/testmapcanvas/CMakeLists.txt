@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSON_C REQUIRED json-c)
+pkg_check_modules(GEOS REQUIRED geos)
 # pkg_check_modules(CAIRO REQUIRED cairo)
 
 # execute_process(COMMAND  pg_config --includedir
@@ -47,12 +48,15 @@ target_include_directories(testmapcanvas PUBLIC
   ../canvas/cpp
   ../..
   ${JSON_C_INCLUDE_DIRS}
+  ${GEOS_INCLUDE_DIRS}
 )
 target_link_directories(testmapcanvas PUBLIC
+  ${JSON_C_LIBRARY_DIRS}
   ${GEOS_LIBRARY_DIRS}
 )
 target_compile_options(testmapcanvas PUBLIC
   ${JSON_C_CFLAGS_OTHER}
+  ${GEOS_CFLAGS_OTHER}
 )
 
 include(GNUInstallDirs)

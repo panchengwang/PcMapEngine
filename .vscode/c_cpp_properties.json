@@ -5,12 +5,16 @@
             "includePath": [
                 "./",
                 "${default}",
-                "D:/msys64/usr/include",
-                "D:/msys64/ucrt64/include",
-                "D:/msys64/ucrt64/include/c++/14.2.0",
                 "${workspaceFolder}/canvas/cpp",
                 "${workspaceFolder}/canvas/c",
-                "D:/msys64/ucrt64/include/c++/14.2.0/x86_64-w64-mingw32"
+                "D:/msys64/usr/include",
+                "D:/msys64/ucrt64/include",
+                "D:/msys64/ucrt64/include/c++/15.1.0",
+                "D:/msys64/ucrt64/include/c++/15.1.0/x86_64-w64-mingw32",
+                "D:/msys64/home/pcwang/software/skia",
+                "D:/msys64/home/pcwang/software/skia/include/core",
+                "D:/msys64/home/pcwang/software/skia/include/encode",
+                "D:/msys64/ucrt64/include/opencv4"
             ],
             "defines": [
                 "_DEBUG",

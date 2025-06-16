@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSON_C REQUIRED json-c)
-pkg_check_modules(CAIRO REQUIRED cairo)
+
 
 
 list(APPEND HEADERS 
