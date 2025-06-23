@@ -12,19 +12,18 @@ int main(int argc, char** argv) {
 
     MapCanvas canvas;
 
-    GeometryFactory::Ptr factory = GeometryFactory::create();
+    geos::geom::GeometryFactory::Ptr geomFactory = geos::geom::GeometryFactory::create();
+    geos::io::WKTReader _wktReader(geomFactory.get());
 
-    /*
-    * Reader requires a factory to bind the geometry to
-    * for shared resources like the PrecisionModel
-    */
-    geos::io::WKTReader reader(*factory);
+    auto geo = _wktReader.read("POINT(45 45)");
 
 
     canvas.begin();
-    canvas.draw(reader.read("POINT(0 0)").get());
-    canvas.draw(reader.read("LINESTRING(0 0, 10 10)").get());
-    canvas.draw(reader.read("POLYGON((5 5, 15 5, 15 15, 5 15, 5 5))").get());
+    for (int i = 0;i < 1;++i) {
+        canvas.draw(geo.get());
+    }
+
+    // canvas.draw("LINESTRING(1 2,3 4)");
 
     canvas.log();
     canvas.end();

@@ -11,6 +11,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSON_C REQUIRED json-c)
 pkg_check_modules(GEOS REQUIRED geos)
+find_package(Boost REQUIRED COMPONENTS json)
+
 # pkg_check_modules(CAIRO REQUIRED cairo)
 
 # execute_process(COMMAND  pg_config --includedir
@@ -41,22 +43,28 @@ add_executable(testmapcanvas
 target_link_libraries(testmapcanvas
   ${JSON_C_LIBRARIES}
   mapcanvas
+  Boost::json
 )
 target_compile_definitions(testmapcanvas PRIVATE AS_LIBRARY)
+
 target_include_directories(testmapcanvas PUBLIC
   .
   ../canvas/cpp
   ../..
-  ${JSON_C_INCLUDE_DIRS}
+  # ${JSON_C_INCLUDE_DIRS}
   ${GEOS_INCLUDE_DIRS}
+  ${BOOST_INCLUDE_DIRS}
 )
 target_link_directories(testmapcanvas PUBLIC
-  ${JSON_C_LIBRARY_DIRS}
+  # ${JSON_C_LIBRARY_DIRS}
   ${GEOS_LIBRARY_DIRS}
+  ${BOOST_LIBRARY_DIRS}
+
 )
 target_compile_options(testmapcanvas PUBLIC
-  ${JSON_C_CFLAGS_OTHER}
+  # ${JSON_C_CFLAGS_OTHER}
   ${GEOS_CFLAGS_OTHER}
+  ${BOOST_CFLAGS_OTHER}
 )
 
 include(GNUInstallDirs)

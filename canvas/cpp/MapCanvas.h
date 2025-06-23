@@ -8,7 +8,10 @@
 #include <SkSurface.h>
 #include <SkCanvas.h>
 #include <opencv4/opencv2/opencv.hpp>
-
+#include <geos/geom/GeometryFactory.h>
+#include <geos/geom/util/GeometryEditor.h>
+#include "AffineTransformOperation.h"
+#include "../../symbol/cpp/MapSymbol.h"
 /**
  * @class MapCanvas
  * @brief MapCanvas 类用于绘制地图的画布。
@@ -35,7 +38,7 @@ public:
     void draw(const geos::geom::Polygon* geom);
     void draw(const geos::geom::GeometryCollection* geom);
 
-
+    void draw(const std::string& wkt);
 
     bool begin();
     bool end();
@@ -46,6 +49,8 @@ public:
 protected:
     void recalculateMapParameters();
     std::string createUUID();
+
+    geos::geom::Geometry::Ptr mapToCanvas(const geos::geom::Geometry* geom);
 
 private:
 
@@ -61,6 +66,13 @@ private:
 
     cv::Mat _transformMatrix;
 
+    AffineTransformOperation _affineOperator;
+    geos::geom::GeometryFactory::Ptr _geomFactory;
+    geos::geom::util::GeometryEditor _geomEditor;
+    geos::io::WKTReader _wktReader;
+
+    MapSymbol  _defaultStrokeSymbol;
+    MapSymbol  _defaultFillSymbol;
 };
 
 

@@ -6,13 +6,15 @@
 #include <SkImage.h>
 #include <SkStream.h>
 #include <SkSurface.h>
-#include "SkStream.h"
+#include <SkPath.h>
 #include <SkPngEncoder.h>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <filesystem>
 #include <opencv4/opencv2/opencv.hpp>
+#include <geos/geom/util/GeometryEditor.h>
+
 
 MapCanvas::MapCanvas() {
     _dotsPerMM = 96.0 / 25.4;
@@ -30,9 +32,54 @@ MapCanvas::MapCanvas() {
 
     // 创建一个临时文件路径，并将其赋值给_filename变量。
     _filename = createUUID();
+    _geomFactory = geos::geom::GeometryFactory::create();
+    _geomEditor = geos::geom::util::GeometryEditor(_geomFactory.get());
+    _affineOperator.setGeometryFactory(_geomFactory.get());
+    _wktReader = geos::io::WKTReader(_geomFactory.get());
 
-
+    if (!_defaultStrokeSymbol.fromJson(R"({
+        "width": 10.0,
+        "height":10.0,
+        "shapes":[{
+            "type":"circle",
+            "stroke":{
+                "color":"#000000",
+                "width":1.0,
+                "cap":"round",
+                "join":"miter",
+                "dashes":[10,0]
+            },
+            "fill":{
+            },
+            "center":[0.12334433434343, 0.0],
+            "radius":0.5
+        }]
+    })")) {
+        std::cerr << _defaultStrokeSymbol.getErrorMessage() << std::endl;
+    }
 }
+
+
+MapCanvas::MapCanvas(const geos::geom::Envelope& env, double width, double height) {
+    _dotsPerMM = 96.0 / 25.4;
+    _width = width;
+    _height = height;
+    _minX = env.getMinX();
+    _maxX = env.getMaxX();
+    _minY = env.getMinY();
+    _maxY = env.getMaxY();
+    _centerX = (_minX + _maxX) * 0.5;
+    _centerY = (_minY + _maxY) * 0.5;
+    recalculateMapParameters();
+    _canvas = NULL;
+    setFormat("PNG");
+    _filename = createUUID();
+    _geomFactory = geos::geom::GeometryFactory::create();
+    _geomEditor = geos::geom::util::GeometryEditor(_geomFactory.get());
+    _affineOperator.setGeometryFactory(_geomFactory.get());
+    _wktReader = geos::io::WKTReader(_geomFactory.get());
+}
+
 
 MapCanvas::~MapCanvas() {
 
@@ -62,31 +109,15 @@ void MapCanvas::recalculateMapParameters() {
     };
     cv::Mat transformMatrix = cv::getAffineTransform(srcPoints, dstPoints);
     _transformMatrix = transformMatrix;
+
+    _affineOperator.setMatirx(_transformMatrix);
 }
 
-
-
-MapCanvas::MapCanvas(const geos::geom::Envelope& env, double width, double height) {
-    _dotsPerMM = 96.0 / 25.4;
-    _width = width;
-    _height = height;
-    _minX = env.getMinX();
-    _maxX = env.getMaxX();
-    _minY = env.getMinY();
-    _maxY = env.getMaxY();
-    _centerX = (_minX + _maxX) * 0.5;
-    _centerY = (_minY + _maxY) * 0.5;
-    recalculateMapParameters();
-    _canvas = NULL;
-    setFormat("PNG");
-    _filename = createUUID();
-}
 
 
 void MapCanvas::setFormat(const std::string& format) {
     _format = format;
     std::transform(_format.begin(), _format.end(), _format.begin(), ::tolower);
-
 }
 
 void MapCanvas::setCanvasSize(double width, double height) {
@@ -145,20 +176,7 @@ bool MapCanvas::begin() {
 
     if (_canvas != NULL) {
         _canvas->clear(SK_ColorTRANSPARENT);
-        _canvas->save();
-
-
-
-
-        SkPaint paint;
-        paint.setAntiAlias(true);
-        paint.setStyle(SkPaint::kStroke_Style);
-        paint.setColor(SK_ColorBLACK);
-        paint.setStrokeWidth(1);
-
-        _canvas->drawCircle(0, 0, 90, paint);
-
-
+        // _canvas->save();
 
     }
 
@@ -166,9 +184,14 @@ bool MapCanvas::begin() {
 }
 
 
+
+geos::geom::Geometry::Ptr MapCanvas::mapToCanvas(const geos::geom::Geometry* geom) {
+
+}
+
 bool MapCanvas::end() {
     if (_canvas != NULL) {
-        _canvas->restore();
+        // _canvas->restore();
     }
     return true;
 }
@@ -194,6 +217,8 @@ void MapCanvas::log() {
         << _transformMatrix.at<double>(1, 1) << ", "
         << _transformMatrix.at<double>(1, 2) << " ]"
         << std::endl;
+
+    std::cerr << _defaultStrokeSymbol.toJson() << std::endl;
 }
 
 
@@ -257,27 +282,36 @@ char* MapCanvas::data(size_t& len) {
     return buf;
 }
 
+void MapCanvas::draw(const std::string& wkt) {
+    auto geo = _wktReader.read(wkt.c_str());
+    draw(geo.get());
+}
+
 
 void MapCanvas::draw(const geos::geom::Geometry* geom) {
     if (!geom) return;
     if (geom->isEmpty()) return;
 
+    std::unique_ptr<geos::geom::Geometry> transformedGeometry(
+        _geomEditor.edit(geom, &_affineOperator)
+    );
+
     // 绘制几何对象
-    switch (geom->getGeometryTypeId()) {
+    switch (transformedGeometry->getGeometryTypeId()) {
     case geos::geom::GEOS_POINT:
-        draw((geos::geom::Point*)geom);
+        draw((const geos::geom::Point*)transformedGeometry.get());
         break;
     case geos::geom::GEOS_LINESTRING:
-        draw((geos::geom::LineString*)geom);
+        draw((const geos::geom::LineString*)transformedGeometry.get());
         break;
     case geos::geom::GEOS_POLYGON:
-        draw((geos::geom::Polygon*)geom);
+        draw((const geos::geom::Polygon*)transformedGeometry.get());
         break;
     case geos::geom::GEOS_MULTIPOINT:
     case geos::geom::GEOS_MULTILINESTRING:
     case geos::geom::GEOS_MULTIPOLYGON:
     case geos::geom::GEOS_GEOMETRYCOLLECTION:
-        draw((geos::geom::GeometryCollection*)geom);
+        draw((const geos::geom::GeometryCollection*)transformedGeometry.get());
         break;
     default:
         // 处理其他类型的几何对象，例如 GeometryCollection 等
@@ -288,7 +322,21 @@ void MapCanvas::draw(const geos::geom::Geometry* geom) {
 
 
 void MapCanvas::draw(const geos::geom::Point* geom) {
-    std::cerr << "draw point" << std::endl;
+
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setColor(SK_ColorRED);
+    paint.setStyle(SkPaint::kFill_Style);
+
+    SkPath path;
+    path.addCircle(geom->getX(), geom->getY(), 30);
+    _canvas->drawPath(path, paint);
+    paint.setStyle(SkPaint::kStroke_Style);
+    paint.setColor(SK_ColorBLUE);
+    paint.setStrokeWidth(1);
+    _canvas->drawPath(path, paint);
+
+    // _canvas->drawCircle(geom->getX(), geom->getY(), 1.0f, SkPaint());
 }
 
 void MapCanvas::draw(const geos::geom::LineString* geom) {

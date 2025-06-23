@@ -1,0 +1,107 @@
+#include "MapSymbol.h"
+#include <boost/json.hpp>
+#include <iostream>
+#include "SymShape.h"
+#include "SymCircle.h"
+#include "JsonUtils.h"
+
+MapSymbol::MapSymbol() {
+
+}
+
+
+MapSymbol::~MapSymbol() {
+
+}
+
+std::string MapSymbol::getErrorMessage() const {
+    return _errorMessage;
+}
+
+
+
+bool MapSymbol::fromJson(const std::string& jsonstr) {
+    bool ret = true;
+    json_object* jsonObj = json_tokener_parse(jsonstr.c_str());
+
+    if (!jsonObj) {
+        _errorMessage = "Invalid JSON string";
+        return false;
+    }
+    ret = fromJson(jsonObj);
+    return ret;
+}
+
+
+
+bool MapSymbol::fromJson(json_object* jsonObj) {
+    clear();
+
+    JSON_GET_DOUBLE(jsonObj, "width", _width, _errorMessage);
+    JSON_GET_DOUBLE(jsonObj, "height", _height, _errorMessage);
+
+    json_object* shapesObj;
+    JSON_GET_ARRAY_OBJ(jsonObj, "shapes", shapesObj, _errorMessage);
+
+    for (size_t i = 0; i < json_object_array_length(shapesObj); i++) {
+        json_object* shapeObj = json_object_array_get_idx(shapesObj, i);
+        std::string typestr;
+        JSON_GET_STRING(shapeObj, "type", typestr, _errorMessage);
+        SymShape* shape = NULL;
+        if (typestr == "circle") {
+            shape = new SymCircle();
+        }
+        else {
+            _errorMessage = std::string("Unsupported shape type: ") + typestr;
+            return false;
+        }
+
+        if (shape != NULL && !shape->fromJson(shapeObj)) {
+            delete shape;
+            clear();
+            return false;
+        }
+
+        _shapes.push_back(shape);
+    }
+
+
+
+    return true;
+}
+
+std::string MapSymbol::toJson() const {
+    json_object* jsonObj = json_object_new_object();
+    json_object_object_add(jsonObj, "width", json_object_new_double(_width));
+    json_object_object_add(jsonObj, "height", json_object_new_double(_height));
+    json_object* shapesArr = json_object_new_array();
+    for (size_t i = 0; i < _shapes.size(); i++) {
+        json_object* shapeObj = _shapes[i]->toJson();
+        json_object_array_add(shapesArr, shapeObj);
+    }
+    json_object_object_add(jsonObj, "shapes", shapesArr);
+    std::string jsonstr = json_object_to_json_string(jsonObj);
+    json_object_put(jsonObj);
+    return jsonstr;
+}
+
+
+// void MapSymbol::toJson(boost::json::value& jsonValue) const {
+//     boost::json::object& obj = jsonValue.as_object();
+//     obj["width"] = _width;
+//     obj["height"] = _height;
+//     if (_shapes.size() > 0) {
+//         boost::json::array arr;
+//         for (size_t i = 0; i < _shapes.size(); i++) {
+//             arr.push_back(_shapes[i]->toJson());
+//         }
+//         obj["shapes"] = arr;
+//     }
+// }
+
+void MapSymbol::clear() {
+    for (size_t i = 0; i < _shapes.size(); i++) {
+        delete _shapes[i];
+    }
+    _shapes.clear();
+}

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(mapcanvas)
 add_subdirectory(canvas)
-# add_subdirectory(symbol)
+add_subdirectory(symbol)
 add_subdirectory(tools)
 
 # mkdir build
