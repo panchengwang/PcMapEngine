@@ -7,6 +7,7 @@
 #include "SymShape.h"
 #include "MapSymbol.h"
 #include <json.h>
+#include <SkImage.h>
 
 class DLL_EXPORT MapSymbol
 {
@@ -21,6 +22,8 @@ public:
     std::string toJson() const;
 
     std::string getErrorMessage() const;
+
+    sk_sp<SkImage> createImage(double dotsPerMM) const;
 
 protected:
     void clear();
