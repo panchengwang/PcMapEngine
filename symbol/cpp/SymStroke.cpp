@@ -3,24 +3,27 @@
 #include <algorithm>
 
 
-#define TO_LOWER(str)                                                           \  
+#define TO_LOWER(str)                                                           \
 {                                                                               \
 std::transform(str.begin(), str.end(), str.begin(), ::tolower);                 \
 }
 
 
-SymStroke::SymStroke(void) {
+SymStroke::SymStroke() {
 
 }
 
 
-SymStroke::~SymStroke(void) {
+SymStroke::~SymStroke() {
     _dashes.clear();
 }
 
 
 bool SymStroke::fromJson(json_object* jsonObj, std::string& errMsg) {
     std::string capstr;
+
+    JSON_GET_DOUBLE(jsonObj, "width", _width, errMsg);
+
     JSON_GET_STRING(jsonObj, "cap", capstr, errMsg);
     TO_LOWER(capstr);
     if (capstr == "butt") {
@@ -55,8 +58,11 @@ bool SymStroke::fromJson(json_object* jsonObj, std::string& errMsg) {
     }
 
     json_object* colorObj;
-    JSON_GET_OBJECT(jsonObj, "color", colorObj, errMsg);
-    _color.fromJson(colorObj, errMsg);
+    JSON_GET_ARRAY_OBJECT_STRING(jsonObj, "color", colorObj, errMsg);
+    if (!_color.fromJson(colorObj, errMsg)) {
+        errMsg = "Invalid color: " + errMsg;
+        return false;
+    }
 
     _dashes.clear();
     json_object* dashesObj;
@@ -72,8 +78,9 @@ bool SymStroke::fromJson(json_object* jsonObj, std::string& errMsg) {
 }
 
 
-json_object* SymStroke::toJson() {
+json_object* SymStroke::toJson() const {
     json_object* jsonObj = json_object_new_object();
+    json_object_object_add(jsonObj, "width", json_object_new_double(_width));
 
     switch (_cap) {
     case CAP_BUTT:

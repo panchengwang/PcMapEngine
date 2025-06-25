@@ -19,8 +19,6 @@ public:
     bool fromJson(json_object* jsonobj);
 
     std::string toJson() const;
-    // void toJson(json_object** json_object) const;
-
 
     std::string getErrorMessage() const;
 

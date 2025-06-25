@@ -37,13 +37,13 @@ MapCanvas::MapCanvas() {
     _affineOperator.setGeometryFactory(_geomFactory.get());
     _wktReader = geos::io::WKTReader(_geomFactory.get());
 
-    if (!_defaultStrokeSymbol.fromJson(R"({
+    if (!_defaultPointSymbol.fromJson(R"({
         "width": 10.0,
         "height":10.0,
         "shapes":[{
             "type":"circle",
             "stroke":{
-                "color":"#000000",
+                "color":[255, 0, 0, 255],
                 "width":1.0,
                 "cap":"round",
                 "join":"miter",
@@ -55,7 +55,7 @@ MapCanvas::MapCanvas() {
             "radius":0.5
         }]
     })")) {
-        std::cerr << _defaultStrokeSymbol.getErrorMessage() << std::endl;
+        std::cerr << _defaultPointSymbol.getErrorMessage() << std::endl;
     }
 }
 
@@ -218,7 +218,7 @@ void MapCanvas::log() {
         << _transformMatrix.at<double>(1, 2) << " ]"
         << std::endl;
 
-    std::cerr << _defaultStrokeSymbol.toJson() << std::endl;
+    std::cerr << _defaultPointSymbol.toJson() << std::endl;
 }
 
 

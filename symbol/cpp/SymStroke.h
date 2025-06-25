@@ -22,12 +22,13 @@ public:
     };
 
 public:
-    SymStroke(void);
-    ~SymStroke(void);
+    SymStroke();
+    ~SymStroke();
 
 
     bool fromJson(json_object* jsonObj, std::string& errMsg);
-    json_object* toJson();
+    json_object* toJson() const;
+
 
 
 protected:
@@ -35,6 +36,7 @@ protected:
     JoinStyle _join;
     std::vector<double> _dashes;
     SymColor _color;
+    double _width;
 
 };
 

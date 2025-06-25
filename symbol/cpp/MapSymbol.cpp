@@ -57,6 +57,7 @@ bool MapSymbol::fromJson(json_object* jsonObj) {
         }
 
         if (shape != NULL && !shape->fromJson(shapeObj)) {
+            _errorMessage = shape->getErrorMessage();
             delete shape;
             clear();
             return false;
@@ -75,6 +76,7 @@ std::string MapSymbol::toJson() const {
     json_object_object_add(jsonObj, "width", json_object_new_double(_width));
     json_object_object_add(jsonObj, "height", json_object_new_double(_height));
     json_object* shapesArr = json_object_new_array();
+
     for (size_t i = 0; i < _shapes.size(); i++) {
         json_object* shapeObj = _shapes[i]->toJson();
         json_object_array_add(shapesArr, shapeObj);
@@ -104,4 +106,10 @@ void MapSymbol::clear() {
         delete _shapes[i];
     }
     _shapes.clear();
+}
+
+
+
+sk_sp<SkImage> MapSymbol::createImage(double dotsPerMM) const {
+    return nullptr;
 }

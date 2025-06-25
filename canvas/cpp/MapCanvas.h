@@ -71,7 +71,7 @@ private:
     geos::geom::util::GeometryEditor _geomEditor;
     geos::io::WKTReader _wktReader;
 
-    MapSymbol  _defaultStrokeSymbol;
+    MapSymbol  _defaultSymbol;
     MapSymbol  _defaultFillSymbol;
 };
 

@@ -75,7 +75,20 @@
         val = myobj;                                                                                                    \
     }
 
-
+#define JSON_GET_ARRAY_OBJECT_STRING(obj, name, val, errMsg)                                                            \
+    {                                                                                                                   \
+        json_object* myobj;                                                                                             \
+        if (!json_object_object_get_ex(obj, name, &myobj)) {                                                            \
+            errMsg = std::string("Missing  field: ") + name;                                                            \
+            return false;                                                                                               \
+        }                                                                                                               \
+        json_type mytype = json_object_get_type(myobj);                                                                 \
+        if (mytype != json_type_array && mytype != json_type_string && mytype != json_type_object ) {                    \
+            errMsg = std::string("Invalid type for field: ") + name + " (array,object,string)";                         \
+            return false;                                                                                               \
+        }                                                                                                               \
+        val = myobj;                                                                                                    \
+    }
 
 
 #endif
