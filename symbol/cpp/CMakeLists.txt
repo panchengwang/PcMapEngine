@@ -43,7 +43,9 @@ list(APPEND HEADERS
   SymPoint.h  
   SymShape.h
   SymCircle.h
+  SymCanvas.h
   MapSymbol.h
+
 )
 
 list(APPEND SOURCES 
@@ -53,6 +55,7 @@ list(APPEND SOURCES
   SymPoint.cpp
   SymShape.cpp
   SymCircle.cpp
+  SymCanvas.cpp
   MapSymbol.cpp
 )
 
