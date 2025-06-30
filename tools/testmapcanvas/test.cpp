@@ -12,16 +12,26 @@ int main(int argc, char** argv) {
 
     MapCanvas canvas;
 
+    canvas.setDotsPerMM(300 / 25.4);
+    canvas.setCanvasSize(200, 160);
+
     geos::geom::GeometryFactory::Ptr geomFactory = geos::geom::GeometryFactory::create();
     geos::io::WKTReader _wktReader(geomFactory.get());
 
-    auto geo = _wktReader.read("POINT(45 45)");
+
 
 
     canvas.begin();
-    for (int i = 0;i < 1;++i) {
-        canvas.draw(geo.get());
-    }
+    auto geo = _wktReader.read("POINT(0 0)");
+    canvas.draw(geo.get());
+    geo = _wktReader.read("POINT(112 28)");
+    canvas.draw(geo.get());
+
+    geo = _wktReader.read("POINT(0 40)");
+    canvas.draw(geo.get());
+
+    geo = _wktReader.read("POINT(-112 28)");
+    canvas.draw(geo.get());
 
     // canvas.draw("LINESTRING(1 2,3 4)");
 

@@ -51,8 +51,8 @@ MapCanvas::MapCanvas() {
             },
             "fill":{
             },
-            "center":[0.12334433434343, 0.0],
-            "radius":0.5
+            "center":[0.0, 0.0],
+            "radius":0.80
         }]
     })")) {
         std::cerr << _defaultPointSymbol.getErrorMessage() << std::endl;
@@ -323,20 +323,23 @@ void MapCanvas::draw(const geos::geom::Geometry* geom) {
 
 void MapCanvas::draw(const geos::geom::Point* geom) {
 
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    paint.setColor(SK_ColorRED);
-    paint.setStyle(SkPaint::kFill_Style);
+    // SkPaint paint;
+    // paint.setAntiAlias(true);
+    // paint.setColor(SK_ColorRED);
+    // paint.setStyle(SkPaint::kFill_Style);
 
-    SkPath path;
-    path.addCircle(geom->getX(), geom->getY(), 30);
-    _canvas->drawPath(path, paint);
-    paint.setStyle(SkPaint::kStroke_Style);
-    paint.setColor(SK_ColorBLUE);
-    paint.setStrokeWidth(1);
-    _canvas->drawPath(path, paint);
+    // SkPath path;
+    // path.addCircle(geom->getX(), geom->getY(), 30);
+    // _canvas->drawPath(path, paint);
+    // paint.setStyle(SkPaint::kStroke_Style);
+    // paint.setColor(SK_ColorBLUE);
+    // paint.setStrokeWidth(1);
+    // _canvas->drawPath(path, paint);
 
     // _canvas->drawCircle(geom->getX(), geom->getY(), 1.0f, SkPaint());
+    // std::cerr << "draw point" << std::endl;
+    sk_sp<SkImage> img = _defaultPointSymbol.createImage(_dotsPerMM);
+    _canvas->drawImage(img.get(), geom->getX() - img->width() * 0.5, geom->getY() - img->height() * 0.5);
 }
 
 void MapCanvas::draw(const geos::geom::LineString* geom) {

@@ -3,6 +3,8 @@
 
 #include <SkCanvas.h>
 #include <SkSurface.h>
+#include "SymShape.h"
+#include "SymCircle.h"
 
 
 class SymCanvas
@@ -12,8 +14,12 @@ public:
     ~SymCanvas();
 
     void set(double width, double height, double dotsPerMM);
+    void draw(SymShape* shp);
+    void draw(SymCircle* shp);
 
-
+    void begin();
+    void end();
+    sk_sp<SkImage> getImage();
 protected:
     sk_sp<SkSurface> _surface;
     SkCanvas* _canvas;
@@ -22,7 +28,7 @@ protected:
     double _height;
     double _dotsPerMM;
 
-
+    cv::Mat _transformMatrix;
 };
 
 #endif

@@ -6,6 +6,11 @@ SymPoint::SymPoint() {
     _x = _y = 0.0f;
 }
 
+SymPoint::SymPoint(double x, double y) {
+    _x = x;
+    _y = y;
+}
+
 
 SymPoint::~SymPoint() {
 
@@ -46,3 +51,17 @@ json_object* SymPoint::toJson() const {
 
 
 
+SymPoint SymPoint::transform(const cv::Mat& transformMatrix) {
+    // cv::Mat points = (cv::Mat_<float>(1, 2) <<
+    //     _x, _y
+    //     );
+
+    // cv::Mat transformed_points;
+    // cv::transform(points, transformed_points, transformMatrix);
+    // return SymPoint(transformed_points.at<float>(0, 0), transformed_points.at<float>(0, 1));
+
+    double x = _x * transformMatrix.at<double>(0, 0) + _y * transformMatrix.at<double>(0, 1) + transformMatrix.at<double>(0, 2);
+    double y = _x * transformMatrix.at<double>(1, 0) + _y * transformMatrix.at<double>(1, 1) + transformMatrix.at<double>(1, 2);
+    return SymPoint(x, y);
+
+}

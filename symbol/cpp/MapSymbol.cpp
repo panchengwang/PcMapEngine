@@ -4,6 +4,7 @@
 #include "SymShape.h"
 #include "SymCircle.h"
 #include "JsonUtils.h"
+#include "SymCanvas.h"
 
 MapSymbol::MapSymbol() {
 
@@ -111,5 +112,13 @@ void MapSymbol::clear() {
 
 
 sk_sp<SkImage> MapSymbol::createImage(double dotsPerMM) const {
-    return nullptr;
+    std::cerr << "createImage" << std::endl;
+    SymCanvas canvas;
+    // canvas.set(_width, _height, dotsPerMM);
+    canvas.begin();
+    for (size_t i = 0; i < _shapes.size(); i++) {
+        canvas.draw(_shapes[i]);
+    }
+    canvas.end();
+    return canvas.getImage();
 }
