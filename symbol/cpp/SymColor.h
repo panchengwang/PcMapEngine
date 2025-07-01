@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <json-c/json.h>
 #include <string> 
+#include <SkColor.h>
 
 class SymColor
 {
@@ -19,6 +20,10 @@ public:
 
     static uint8_t parse_hex_char(char c);
     static uint8_t parse_hex_byte(const char* hex);
+
+    SkColor toSkColor() const {
+        return SkColorSetARGB(_alpha, _red, _green, _blue);
+    }
 protected:
 
     uint8_t _red, _green, _blue, _alpha;

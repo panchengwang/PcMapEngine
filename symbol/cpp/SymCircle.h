@@ -12,6 +12,7 @@ public:
 
     virtual bool fromJson(json_object* jsonObj);
     virtual json_object* toJson() const;
+    virtual SymShape* clone() const;
 
     double radius() const { return _radius; }
     void setRadius(double r) { _radius = r; }

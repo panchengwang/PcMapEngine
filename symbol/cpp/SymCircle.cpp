@@ -40,3 +40,10 @@ json_object* SymCircle::toJson() const {
     return jsonObj;
 }
 
+SymShape* SymCircle::clone() const {
+    SymCircle* c = new SymCircle();
+    c->_stroke = _stroke;
+    c->_center = _center;
+    c->_radius = _radius;
+    return c;
+}

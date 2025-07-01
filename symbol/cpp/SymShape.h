@@ -36,7 +36,10 @@ public:
     virtual bool fromJson(json_object* jsonobj);
     virtual json_object* toJson() const;
 
+    virtual SymShape* clone() const = 0;
     const std::string& getErrorMessage() const;
+
+    const SymStroke* stroke() const { return &_stroke; }
 
 protected:
     bool strokeFromJson(json_object* jsonobj);

@@ -53,10 +53,8 @@ void SymCanvas::draw(SymShape* shp) {
 void SymCanvas::draw(SymCircle* shp) {
     // std::cerr << "draw circle " << std::endl;
     SymPoint center = shp->center().transform(_transformMatrix);
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    paint.setColor(SK_ColorRED);
-    paint.setStyle(SkPaint::kFill_Style);
+    SkPaint paint = shp->stroke()->toPaint(_dotsPerMM);
+
 
     SkPath path;
     path.addOval(
@@ -69,10 +67,10 @@ void SymCanvas::draw(SymCircle* shp) {
 
     // path.addCircle(center.x(), center.y(), shp->radius() * _dotsPerMM);
     _canvas->drawPath(path, paint);
-    paint.setStyle(SkPaint::kStroke_Style);
-    paint.setColor(SK_ColorBLUE);
-    paint.setStrokeWidth(1);
-    _canvas->drawPath(path, paint);
+    // paint.setStyle(SkPaint::kStroke_Style);
+    // paint.setColor(SK_ColorBLUE);
+    // paint.setStrokeWidth(1);
+    // _canvas->drawPath(path, paint);
 
     // _canvas->drawCircle(geom->getX(), geom->getY(), 1.0f, SkPaint());
 }

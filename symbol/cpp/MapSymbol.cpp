@@ -106,15 +106,16 @@ void MapSymbol::clear() {
     for (size_t i = 0; i < _shapes.size(); i++) {
         delete _shapes[i];
     }
+
     _shapes.clear();
 }
 
 
 
 sk_sp<SkImage> MapSymbol::createImage(double dotsPerMM) const {
-    std::cerr << "createImage" << std::endl;
+    // std::cerr << "createImage" << std::endl;
     SymCanvas canvas;
-    // canvas.set(_width, _height, dotsPerMM);
+    canvas.set(_width, _height, dotsPerMM);
     canvas.begin();
     for (size_t i = 0; i < _shapes.size(); i++) {
         canvas.draw(_shapes[i]);
@@ -122,3 +123,27 @@ sk_sp<SkImage> MapSymbol::createImage(double dotsPerMM) const {
     canvas.end();
     return canvas.getImage();
 }
+
+
+MapSymbol* MapSymbol::clone() const {
+    MapSymbol* ret = new MapSymbol();
+    ret->_width = _width;
+    ret->_height = _height;
+    ret->_dotsPerMM = _dotsPerMM;
+    for (size_t i = 0; i < _shapes.size(); i++) {
+        ret->_shapes.push_back(_shapes[i]->clone());
+    }
+}
+
+
+MapSymbol& MapSymbol::operator=(const MapSymbol& other) {
+    clear();
+    _width = other._width;
+    _height = other._height;
+    for (size_t i = 0; i < other._shapes.size(); i++) {
+        _shapes.push_back(other._shapes[i]->clone());
+    }
+
+    return *this;
+}
+

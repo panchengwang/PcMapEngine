@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSON_C REQUIRED json-c)
 pkg_check_modules(GEOS REQUIRED geos)
-find_package(Boost REQUIRED COMPONENTS json)
+# find_package(Boost REQUIRED COMPONENTS json)
 
 # pkg_check_modules(CAIRO REQUIRED cairo)
 
@@ -43,7 +43,7 @@ add_executable(testmapcanvas
 target_link_libraries(testmapcanvas
   ${JSON_C_LIBRARIES}
   mapcanvas
-  Boost::json
+  mapsymbol
 )
 target_compile_definitions(testmapcanvas PRIVATE AS_LIBRARY)
 

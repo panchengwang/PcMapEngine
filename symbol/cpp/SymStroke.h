@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include "SymColor.h"
+#include <SkPaint.h>
 
 class SymStroke
 {
@@ -23,13 +24,15 @@ public:
 
 public:
     SymStroke();
+    SymStroke(const SymStroke& stroke);
+
     ~SymStroke();
 
 
     bool fromJson(json_object* jsonObj, std::string& errMsg);
     json_object* toJson() const;
 
-
+    SkPaint toPaint(double dotsPerMM) const;
 
 protected:
     CapStyle _cap;

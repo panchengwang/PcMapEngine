@@ -32,6 +32,11 @@ public:
     void setScale(double scale);
     void setFormat(const std::string& format);
 
+    void setDefaultPointSymbol(const MapSymbol& symbol);
+    void setDefaultLineSymbol(const MapSymbol& symbol);
+    void setDefaultFillSymbol(const MapSymbol& symbol);
+
+
     void draw(const geos::geom::Geometry* geom);
     void draw(const geos::geom::Point* geom);
     void draw(const geos::geom::LineString* geom);
@@ -72,6 +77,7 @@ private:
     geos::io::WKTReader _wktReader;
 
     MapSymbol  _defaultPointSymbol;
+    MapSymbol  _defaultLineSymbol;
     MapSymbol  _defaultFillSymbol;
 };
 

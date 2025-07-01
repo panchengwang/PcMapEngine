@@ -116,3 +116,24 @@ json_object* SymStroke::toJson() const {
     return jsonObj;
 }
 
+
+SymStroke::SymStroke(const SymStroke& stroke) {
+    _width = stroke._width;
+    _cap = stroke._cap;
+    _join = stroke._join;
+    for (auto dash : stroke._dashes) {
+        _dashes.push_back(dash);
+    }
+    _color = stroke._color;
+}
+
+
+
+SkPaint SymStroke::toPaint(double dotsPerMM) const {
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setStrokeWidth(_width * dotsPerMM);
+    paint.setStyle(SkPaint::kStroke_Style);
+    paint.setColor(_color.toSkColor());
+    return paint;
+}

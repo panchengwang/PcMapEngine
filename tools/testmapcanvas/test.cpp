@@ -14,6 +14,31 @@ int main(int argc, char** argv) {
 
     canvas.setDotsPerMM(300 / 25.4);
     canvas.setCanvasSize(200, 160);
+    MapSymbol defaultPointSymbol;
+    if (!defaultPointSymbol.fromJson(R"({
+        "width": 10.0,
+        "height":10.0,
+        "shapes":[{
+            "type":"circle",
+            "stroke":{
+                "color":[0, 0, 255, 255],
+                "width":1.0,
+                "cap":"round",
+                "join":"miter",
+                "dashes":[10,0]
+            },
+            "fill":{
+            },
+            "center":[0.0, 0.0],
+            "radius":0.80
+        }]
+    })")) {
+        std::cerr << defaultPointSymbol.getErrorMessage() << std::endl;
+    }
+    else {
+        canvas.setDefaultPointSymbol(defaultPointSymbol);
+    }
+
 
     geos::geom::GeometryFactory::Ptr geomFactory = geos::geom::GeometryFactory::create();
     geos::io::WKTReader _wktReader(geomFactory.get());
@@ -22,8 +47,12 @@ int main(int argc, char** argv) {
 
 
     canvas.begin();
+
     auto geo = _wktReader.read("POINT(0 0)");
+
     canvas.draw(geo.get());
+
+
     geo = _wktReader.read("POINT(112 28)");
     canvas.draw(geo.get());
 

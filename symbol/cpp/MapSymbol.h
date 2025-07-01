@@ -15,6 +15,7 @@ public:
     MapSymbol();
     ~MapSymbol();
 
+    MapSymbol* clone() const;
 
     bool fromJson(const std::string& jsontstr);
     bool fromJson(json_object* jsonobj);
@@ -24,6 +25,8 @@ public:
     std::string getErrorMessage() const;
 
     sk_sp<SkImage> createImage(double dotsPerMM) const;
+
+    MapSymbol& operator=(const MapSymbol& other);
 
 protected:
     void clear();

@@ -353,3 +353,16 @@ void MapCanvas::draw(const geos::geom::Polygon* geom) {
 void MapCanvas::draw(const geos::geom::GeometryCollection* geom) {
     std::cerr << "draw geometrycollection" << std::endl;
 }
+
+
+
+
+void MapCanvas::setDefaultPointSymbol(const MapSymbol& symbol) {
+    _defaultPointSymbol = symbol;
+}
+void MapCanvas::setDefaultLineSymbol(const MapSymbol& symbol) {
+    _defaultLineSymbol = symbol;
+}
+void MapCanvas::setDefaultFillSymbol(const MapSymbol& symbol) {
+    _defaultFillSymbol = symbol;
+}
