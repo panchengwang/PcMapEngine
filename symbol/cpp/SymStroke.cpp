@@ -1,6 +1,7 @@
 #include "SymStroke.h"
 #include "JsonUtils.h"
 #include <algorithm>
+#include <include/effects/SkDashPathEffect.h>
 
 
 #define TO_LOWER(str)                                                           \
@@ -135,5 +136,10 @@ SkPaint SymStroke::toPaint(double dotsPerMM) const {
     paint.setStrokeWidth(_width * dotsPerMM);
     paint.setStyle(SkPaint::kStroke_Style);
     paint.setColor(_color.toSkColor());
+    float intervals[_dashes.size()];
+    for (int i = 0; i < _dashes.size(); i++) {
+        intervals[i] = _dashes[i] * dotsPerMM;
+    }
+    paint.setPathEffect(SkDashPathEffect::Make(intervals, _dashes.size(), 0.0f));
     return paint;
 }

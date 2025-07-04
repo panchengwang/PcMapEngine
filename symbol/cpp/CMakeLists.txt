@@ -40,6 +40,7 @@ list(APPEND HEADERS
   SymColor.h
   SymStroke.h
   SymFill.h
+  SymSolidFill.h
   SymPoint.h  
   SymShape.h
   SymCircle.h
@@ -52,6 +53,7 @@ list(APPEND SOURCES
   SymColor.cpp
   SymStroke.cpp
   SymFill.cpp
+  SymSolidFill.cpp
   SymPoint.cpp
   SymShape.cpp
   SymCircle.cpp

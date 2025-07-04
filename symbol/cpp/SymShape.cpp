@@ -4,11 +4,12 @@
 
 SymShape::SymShape() {
     _type = SYM_NONE;
+    _stroke = new SymStroke();
 }
 
 
 SymShape::~SymShape() {
-
+    delete _stroke;
 }
 
 
@@ -41,5 +42,7 @@ const std::string& SymShape::getErrorMessage() const {
 bool SymShape::strokeFromJson(json_object* jsonobj) {
     json_object* strokeJsonObj;
     JSON_GET_OBJECT(jsonobj, "stroke", strokeJsonObj, _errorMessage);
-    return _stroke.fromJson(strokeJsonObj, _errorMessage);
+    return _stroke->fromJson(strokeJsonObj, _errorMessage);
 }
+
+

@@ -21,13 +21,15 @@ int main(int argc, char** argv) {
         "shapes":[{
             "type":"circle",
             "stroke":{
-                "color":[0, 0, 255, 255],
-                "width":1.0,
+                "color":[255, 0, 0, 255],
+                "width":0.5,
                 "cap":"round",
                 "join":"miter",
-                "dashes":[10,0]
+                "dashes":[1,0.5]
             },
             "fill":{
+                "type":"solid",
+                "color":[128, 0, 0, 255]
             },
             "center":[0.0, 0.0],
             "radius":0.80

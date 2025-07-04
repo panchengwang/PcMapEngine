@@ -39,7 +39,7 @@ public:
     virtual SymShape* clone() const = 0;
     const std::string& getErrorMessage() const;
 
-    const SymStroke* stroke() const { return &_stroke; }
+    const SymStroke* stroke() const { return _stroke; }
 
 protected:
     bool strokeFromJson(json_object* jsonobj);
@@ -48,7 +48,7 @@ protected:
     int _type;
     std::string _errorMessage;
 
-    SymStroke _stroke;
+    SymStroke* _stroke;
 };
 
 

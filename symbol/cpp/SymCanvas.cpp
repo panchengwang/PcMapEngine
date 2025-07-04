@@ -79,6 +79,7 @@ void SymCanvas::draw(SymCircle* shp) {
 void SymCanvas::begin() {
     _surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(_width * _dotsPerMM, _height * _dotsPerMM));
     _canvas = _surface->getCanvas();
+    _canvas->clear(SK_ColorTRANSPARENT);
 }
 
 void SymCanvas::end() {

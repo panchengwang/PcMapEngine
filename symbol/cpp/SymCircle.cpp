@@ -34,7 +34,7 @@ bool SymCircle::fromJson(json_object* jsonObj) {
 json_object* SymCircle::toJson() const {
     json_object* jsonObj = SymShape::toJson();
     json_object_object_add(jsonObj, "type", json_object_new_string("circle"));
-    json_object_object_add(jsonObj, "stroke", _stroke.toJson());
+    json_object_object_add(jsonObj, "stroke", _stroke->toJson());
     json_object_object_add(jsonObj, "center", _center.toJson());
     json_object_object_add(jsonObj, "radius", json_object_new_double(_radius));
     return jsonObj;
