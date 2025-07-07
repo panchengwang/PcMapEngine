@@ -50,6 +50,8 @@ MapCanvas::MapCanvas() {
                 "dashes":[10,0]
             },
             "fill":{
+                "type":"solid",
+                "color":[0,0,0,127]
             },
             "center":[0.0, 0.0],
             "radius":0.80

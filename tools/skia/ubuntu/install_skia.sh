@@ -2,8 +2,8 @@
 
 echo "Tools to install skia library on ubuntu"
 
-export https_proxy=http://192.168.51.203:7897
-export http_proxy=http://192.168.51.203:7897
+export https_proxy=http://172.21.64.1:7897
+export http_proxy=http://172.21.64.1:7897
 
 echo "Clone skia repository from github"
 SRC_DIR=~

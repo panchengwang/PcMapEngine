@@ -1,10 +1,11 @@
 #include "MapSymbol.h"
-#include <boost/json.hpp>
+
 #include <iostream>
 #include "SymShape.h"
 #include "SymCircle.h"
 #include "JsonUtils.h"
 #include "SymCanvas.h"
+#include "SymRectangle.h"
 
 MapSymbol::MapSymbol() {
 
@@ -51,6 +52,9 @@ bool MapSymbol::fromJson(json_object* jsonObj) {
         SymShape* shape = NULL;
         if (typestr == "circle") {
             shape = new SymCircle();
+        }
+        else if (typestr == "rectangle") {
+            shape = new SymRectangle();
         }
         else {
             _errorMessage = std::string("Unsupported shape type: ") + typestr;

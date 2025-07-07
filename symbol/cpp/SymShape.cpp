@@ -1,15 +1,18 @@
-#include "SymShape.h"
+#include "SymShape.h" 
 #include "JsonUtils.h"
-
+#include "SymSolidFill.h"
+#include <iostream>
 
 SymShape::SymShape() {
     _type = SYM_NONE;
     _stroke = new SymStroke();
+    _fill = NULL;
 }
 
 
 SymShape::~SymShape() {
     delete _stroke;
+    delete _fill;
 }
 
 
@@ -46,3 +49,24 @@ bool SymShape::strokeFromJson(json_object* jsonobj) {
 }
 
 
+bool SymShape::fillFromJson(json_object* jsonobj) {
+    json_object* fillJsonObj;
+    JSON_GET_OBJECT(jsonobj, "fill", fillJsonObj, _errorMessage);
+
+    if (_fill) {
+        delete _fill;
+        _fill = NULL;
+    }
+    std::string typestr;
+    JSON_GET_STRING(fillJsonObj, "type", typestr, _errorMessage);
+    std::cerr << typestr << std::endl;
+    if (typestr == "solid") {
+        _fill = new SymSolidFill();
+    }
+    else {
+        _errorMessage = "Invalid fill type: " + typestr;
+        return false;
+    }
+
+    return _fill->fromJson(fillJsonObj, _errorMessage);
+}

@@ -3,9 +3,10 @@
 
 #include <map_engine_dll_exports.h>
 // #include <boost/json.hpp>
-#include <json.h>
+#include <json-c/json.h>
 #include <string>
 #include "SymStroke.h"
+#include "SymFill.h"
 
 class SymShape
 {
@@ -40,15 +41,16 @@ public:
     const std::string& getErrorMessage() const;
 
     const SymStroke* stroke() const { return _stroke; }
-
+    const SymFill* fill() const { return _fill; }
 protected:
     bool strokeFromJson(json_object* jsonobj);
-
+    bool fillFromJson(json_object* jsonobj);
 protected:
     int _type;
     std::string _errorMessage;
 
     SymStroke* _stroke;
+    SymFill* _fill;
 };
 
 

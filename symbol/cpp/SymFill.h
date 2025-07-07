@@ -2,6 +2,7 @@
 #define __SYM_FILL_H__
 
 #include <string>
+#include <SkPaint.h>
 #include "SymColor.h"
 
 class SymFill {
@@ -19,6 +20,8 @@ public:
     virtual bool fromJson(json_object* json, std::string& errMsg) = 0;
     virtual json_object* toJson() const;
 
+    virtual SkPaint toPaint(double dotsPerMM) const = 0;
+    virtual SymFill* clone() const = 0;
 protected:
     FillType _type;
 };

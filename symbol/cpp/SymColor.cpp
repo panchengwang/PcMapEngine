@@ -41,7 +41,7 @@ bool SymColor::fromHex(const char* hex, std::string& errMsg) {
     if (len == 7 || len == 9) { // #RRGGBB 或 #RRGGBBAA
         _red = parse_hex_byte(hex + 1);
         _green = parse_hex_byte(hex + 3);
-        _blue == parse_hex_byte(hex + 5);
+        _blue = parse_hex_byte(hex + 5);
         if (len == 9)
             _alpha = parse_hex_byte(hex + 7);
     }

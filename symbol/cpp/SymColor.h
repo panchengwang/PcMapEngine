@@ -24,6 +24,23 @@ public:
     SkColor toSkColor() const {
         return SkColorSetARGB(_alpha, _red, _green, _blue);
     }
+
+    uint8_t red() const {
+        return _red;
+    }
+
+    uint8_t green() const {
+        return _green;
+    }
+
+    uint8_t blue() const {
+        return _blue;
+    }
+
+    uint8_t alpha() const {
+        return _alpha;
+    }
+
 protected:
 
     uint8_t _red, _green, _blue, _alpha;

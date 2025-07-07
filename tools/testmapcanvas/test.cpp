@@ -29,13 +29,31 @@ int main(int argc, char** argv) {
             },
             "fill":{
                 "type":"solid",
-                "color":[128, 0, 0, 255]
+                "color":[255,255,0,127]
             },
             "center":[0.0, 0.0],
             "radius":0.80
+        },{
+            "type":"rectangle",
+            "stroke":{
+                "color":[255, 0, 0, 255],
+                "width":0.1,
+                "cap":"round",
+                "join":"miter",
+                "dashes":[1,0]
+            },
+            "fill":{
+                "type":"solid",
+                "color":[255,0,255,127]
+            },
+            "minx":-0.4,
+            "maxx":0.8,
+            "miny":-0.8,
+            "maxy":0.8
         }]
     })")) {
         std::cerr << defaultPointSymbol.getErrorMessage() << std::endl;
+        return 1;
     }
     else {
         canvas.setDefaultPointSymbol(defaultPointSymbol);

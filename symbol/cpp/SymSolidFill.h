@@ -9,6 +9,8 @@ public:
     virtual ~SymSolidFill() {}
     bool fromJson(json_object* json, std::string& errMsg) override;
     json_object* toJson() const override;
+    SymFill* clone() const override;
+    virtual SkPaint toPaint(double dotsPerMM) const override;
 private:
     SymColor _color;
 };

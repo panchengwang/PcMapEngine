@@ -5,7 +5,7 @@
 #include <SkSurface.h>
 #include "SymShape.h"
 #include "SymCircle.h"
-
+#include "SymRectangle.h"
 
 class SymCanvas
 {
@@ -16,6 +16,7 @@ public:
     void set(double width, double height, double dotsPerMM);
     void draw(SymShape* shp);
     void draw(SymCircle* shp);
+    void draw(SymRectangle* shp);
 
     void begin();
     void end();

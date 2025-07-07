@@ -6,7 +6,7 @@
 #include <vector>
 #include "SymShape.h"
 #include "MapSymbol.h"
-#include <json.h>
+#include <json-c/json.h>
 #include <SkImage.h>
 
 class DLL_EXPORT MapSymbol

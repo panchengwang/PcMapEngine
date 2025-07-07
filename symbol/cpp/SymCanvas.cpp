@@ -3,6 +3,7 @@
 #include <opencv4/opencv2/core.hpp>
 #include <opencv4/opencv2/imgproc.hpp>
 #include "SymCircle.h"
+#include "SymRectangle.h"
 #include <SkPaint.h>
 #include <SkPath.h>
 
@@ -23,9 +24,9 @@ void SymCanvas::set(double width, double height, double dotsPerMM) {
     _dotsPerMM = dotsPerMM;
 
     std::vector<cv::Point2f> srcPoints = {
-     cv::Point2f(-_width * 0.5, _height * 0.5),    // 左上
-     cv::Point2f(-_width * 0.5, -_height * 0.5),   // 左下
-     cv::Point2f(_width * 0.5, -_height * 0.5)  // 右下
+     cv::Point2f(-1.0, 1.0),    // 左上
+     cv::Point2f(-1.0, -1.0),   // 左下
+     cv::Point2f(1.0, -1.0)  // 右下
     };
 
     std::vector<cv::Point2f> dstPoints = {
@@ -43,7 +44,9 @@ void SymCanvas::draw(SymShape* shp) {
     case SymShape::SYM_CIRCLE:
         draw(static_cast<SymCircle*>(shp));
         break;
-
+    case SymShape::SYM_RECTANGLE:
+        draw(static_cast<SymRectangle*>(shp));
+        break;
     default:
         break;
     }
@@ -51,11 +54,7 @@ void SymCanvas::draw(SymShape* shp) {
 
 
 void SymCanvas::draw(SymCircle* shp) {
-    // std::cerr << "draw circle " << std::endl;
     SymPoint center = shp->center().transform(_transformMatrix);
-    SkPaint paint = shp->stroke()->toPaint(_dotsPerMM);
-
-
     SkPath path;
     path.addOval(
         SkRect::MakeLTRB(
@@ -64,15 +63,28 @@ void SymCanvas::draw(SymCircle* shp) {
             center.x() + shp->radius() * _dotsPerMM * _width * 0.5,
             center.y() + shp->radius() * _dotsPerMM * _height * 0.5)
     );
-
-    // path.addCircle(center.x(), center.y(), shp->radius() * _dotsPerMM);
+    SkPaint paint;
+    paint = shp->fill()->toPaint(_dotsPerMM);
     _canvas->drawPath(path, paint);
-    // paint.setStyle(SkPaint::kStroke_Style);
-    // paint.setColor(SK_ColorBLUE);
-    // paint.setStrokeWidth(1);
-    // _canvas->drawPath(path, paint);
 
-    // _canvas->drawCircle(geom->getX(), geom->getY(), 1.0f, SkPaint());
+    paint = shp->stroke()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
+
+}
+
+void SymCanvas::draw(SymRectangle* shp) {
+    SymPoint lb = SymPoint(shp->minX(), shp->minY()).transform(_transformMatrix);
+    SymPoint rt = SymPoint(shp->maxX(), shp->maxY()).transform(_transformMatrix);
+    SkPath path;
+    path.addRect(SkRect::MakeLTRB(
+        lb.x() , lb.y() ,
+        rt.x() , rt.y() ));
+    SkPaint paint;
+    paint = shp->fill()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
+
+    paint = shp->stroke()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
 }
 
 

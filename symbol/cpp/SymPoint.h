@@ -4,9 +4,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <json.h>
+#include <json-c/json.h>
 #include <opencv4/opencv2/opencv.hpp>
 #include <opencv4/opencv2/core.hpp>
+
 
 
 class SymPoint {

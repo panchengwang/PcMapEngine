@@ -1,7 +1,7 @@
 #ifndef __SYM_STROKE_H__
 #define __SYM_STROKE_H__
 
-#include <json.h>
+#include <json-c/json.h>
 #include <string>
 #include <vector>
 #include "SymColor.h"
@@ -26,6 +26,7 @@ public:
     SymStroke();
     SymStroke(const SymStroke& stroke);
 
+    SymStroke* clone() const;
     ~SymStroke();
 
 

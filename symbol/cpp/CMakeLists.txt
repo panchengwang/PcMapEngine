@@ -44,6 +44,7 @@ list(APPEND HEADERS
   SymPoint.h  
   SymShape.h
   SymCircle.h
+  SymRectangle.h
   SymCanvas.h
   MapSymbol.h
 
@@ -57,6 +58,7 @@ list(APPEND SOURCES
   SymPoint.cpp
   SymShape.cpp
   SymCircle.cpp
+  SymRectangle.cpp
   SymCanvas.cpp
   MapSymbol.cpp
 )
@@ -74,7 +76,6 @@ target_link_libraries(mapsymbol
   ${SKIA_LIBRARIES}
   # ${UUID_LIBRARIES}
   ${OPENCV4_LIBRARIES}
-  geos
 )
 target_compile_definitions(mapsymbol PRIVATE AS_LIBRARY)
 target_include_directories(mapsymbol PUBLIC 
