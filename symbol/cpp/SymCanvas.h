@@ -13,6 +13,8 @@
 #include "SymChord.h"
 #include "SymPie.h"
 #include "SymSystemLine.h"
+#include "SymRegularPolygon.h"
+#include "SymStar.h"
 
 
 class SymCanvas
@@ -32,6 +34,8 @@ public:
     void draw(SymChord* shp);
     void draw(SymPie* shp);
     void draw(SymSystemLine* shp);
+    void draw(SymRegularPolygon* shp);
+    void draw(SymStar* shp);
 
     void begin();
     void end();

@@ -408,6 +408,75 @@
                     1
                 ]
             }
+        },
+        {
+            "type": "regularpolygon",
+            "stroke": {
+                "color": [
+                    0,
+                    0,
+                    0,
+                    255
+                ],
+                "width": 1,
+                "cap": "round",
+                "join": "round",
+                "dashes": [
+                    1,
+                    0
+                ]
+            },
+            "fill": {
+                "type": "solid",
+                "color": [
+                    128,
+                    128,
+                    0,
+                    100
+                ]
+            },
+            "center": [
+                0.0,
+                0.0
+            ],
+            "radius": 0.25,
+            "sides": 3,
+            "rotation": 0
+        },
+        {
+            "type": "star",
+            "stroke": {
+                "color": [
+                    0,
+                    0,
+                    0,
+                    255
+                ],
+                "width": 1,
+                "cap": "round",
+                "join": "round",
+                "dashes": [
+                    1,
+                    0
+                ]
+            },
+            "fill": {
+                "type": "solid",
+                "color": [
+                    255,
+                    0,
+                    0,
+                    255
+                ]
+            },
+            "center": [
+                0.0,
+                0.0
+            ],
+            "radius": 0.9,
+            "radius2": 0.35,
+            "sides": 5,
+            "rotation": 0
         }
     ]
 }

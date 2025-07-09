@@ -13,6 +13,8 @@
 #include "SymChord.h"
 #include "SymPie.h"
 #include "SymSystemLine.h"
+#include "SymRegularPolygon.h"
+#include "SymStar.h"
 
 
 MapSymbol::MapSymbol() {
@@ -84,6 +86,12 @@ bool MapSymbol::fromJson(json_object* jsonObj) {
         }
         else if (typestr == "systemline") {
             shape = new SymSystemLine();
+        }
+        else if (typestr == "regularpolygon") {
+            shape = new SymRegularPolygon();
+        }
+        else if (typestr == "star") {
+            shape = new SymStar();
         }
         else {
             _errorMessage = std::string("Unsupported shape type: ") + typestr;

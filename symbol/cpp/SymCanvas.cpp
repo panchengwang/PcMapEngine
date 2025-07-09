@@ -69,6 +69,12 @@ void SymCanvas::draw(SymShape* shp) {
     case SymShape::SYM_SYSTEM_LINE:
         draw(static_cast<SymSystemLine*>(shp));
         break;
+    case SymShape::SYM_REGULAR_POLYGON:
+        draw(static_cast<SymRegularPolygon*>(shp));
+        break;
+    case SymShape::SYM_STAR:
+        draw(static_cast<SymStar*>(shp));
+        break;
     default:
         break;
     }
@@ -290,6 +296,74 @@ void SymCanvas::draw(SymSystemLine* shp) {
     SkPaint paint = shp->stroke()->toPaint(_dotsPerMM);
     _canvas->drawPath(path, paint);
 }
+
+
+void SymCanvas::draw(SymRegularPolygon* shp) {
+    SymPoint center = shp->center().transform(_transformMatrix);
+    SkPath path;
+    const std::vector<SymPoint>& points = shp->getPoints();
+    std::vector<SymPoint> transformedPoints;
+    for (auto& pt : points) {
+        transformedPoints.push_back(pt.transform(_transformMatrix));
+    }
+    if (transformedPoints.size() < 2) return;
+
+    path.moveTo(transformedPoints[0].x(), transformedPoints[0].y());
+    for (int i = 1; i < transformedPoints.size(); ++i) {
+        path.lineTo(transformedPoints[i].x(), transformedPoints[i].y());
+    }
+    path.close();
+
+    SkMatrix matrix;
+
+    matrix.setRotate(-shp->rotation());
+    matrix.preTranslate(-center.x(), -center.y());
+    path.transform(matrix);
+    matrix.reset();
+    matrix.setTranslate(center.x(), center.y());
+    path.transform(matrix);
+
+    SkPaint paint;
+    paint = shp->fill()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
+    paint = shp->stroke()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
+}
+
+
+void SymCanvas::draw(SymStar* shp) {
+    SymPoint center = shp->center().transform(_transformMatrix);
+    SkPath path;
+    const std::vector<SymPoint>& points = shp->getPoints();
+
+    std::vector<SymPoint> transformedPoints;
+    for (auto& pt : points) {
+        transformedPoints.push_back(pt.transform(_transformMatrix));
+    }
+    if (transformedPoints.size() < 2) return;
+
+    path.moveTo(transformedPoints[0].x(), transformedPoints[0].y());
+    for (int i = 1; i < transformedPoints.size(); ++i) {
+        path.lineTo(transformedPoints[i].x(), transformedPoints[i].y());
+    }
+    path.close();
+
+    SkMatrix matrix;
+
+    matrix.setRotate(-shp->rotation());
+    matrix.preTranslate(-center.x(), -center.y());
+    path.transform(matrix);
+    matrix.reset();
+    matrix.setTranslate(center.x(), center.y());
+    path.transform(matrix);
+
+    SkPaint paint;
+    paint = shp->fill()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
+    paint = shp->stroke()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
+}
+
 
 void SymCanvas::begin() {
     _surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(_width * _dotsPerMM, _height * _dotsPerMM));

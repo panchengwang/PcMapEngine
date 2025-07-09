@@ -52,6 +52,8 @@ list(APPEND HEADERS
   SymRectangle.h
   SymLineString.h
   SymPolygon.h
+  SymRegularPolygon.h
+  SymStar.h
   SymCanvas.h
   MapSymbol.h
 
@@ -73,6 +75,8 @@ list(APPEND SOURCES
   SymRectangle.cpp
   SymLineString.cpp
   SymPolygon.cpp 
+  SymRegularPolygon.cpp
+  SymStar.cpp
   SymCanvas.cpp
   MapSymbol.cpp
 )
