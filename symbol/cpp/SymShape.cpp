@@ -23,9 +23,6 @@ int SymShape::type() const {
 
 
 bool SymShape::fromJson(json_object* json) {
-
-
-
     return true;
 }
 
@@ -59,7 +56,7 @@ bool SymShape::fillFromJson(json_object* jsonobj) {
     }
     std::string typestr;
     JSON_GET_STRING(fillJsonObj, "type", typestr, _errorMessage);
-    std::cerr << typestr << std::endl;
+
     if (typestr == "solid") {
         _fill = new SymSolidFill();
     }

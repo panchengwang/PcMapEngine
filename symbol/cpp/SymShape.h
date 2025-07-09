@@ -13,7 +13,8 @@ class SymShape
 public:
     enum {
         SYM_NONE = 0,
-        SYM_SYS_LINE,
+        SYM_SYSTEM_LINE,
+        SYM_LINESTRING,
         SYM_POLYGON,
         SYM_REGULAR_POLYGON,
         SYM_RECTANGLE,

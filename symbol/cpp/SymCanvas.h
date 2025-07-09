@@ -6,6 +6,14 @@
 #include "SymShape.h"
 #include "SymCircle.h"
 #include "SymRectangle.h"
+#include "SymPolygon.h"
+#include "SymLineString.h"
+#include "SymEllipse.h"
+#include "SymArc.h"
+#include "SymChord.h"
+#include "SymPie.h"
+#include "SymSystemLine.h"
+
 
 class SymCanvas
 {
@@ -17,6 +25,13 @@ public:
     void draw(SymShape* shp);
     void draw(SymCircle* shp);
     void draw(SymRectangle* shp);
+    void draw(SymPolygon* shp);
+    void draw(SymLineString* shp);
+    void draw(SymEllipse* shp);
+    void draw(SymArc* shp);
+    void draw(SymChord* shp);
+    void draw(SymPie* shp);
+    void draw(SymSystemLine* shp);
 
     void begin();
     void end();

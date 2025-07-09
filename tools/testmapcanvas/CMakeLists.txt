@@ -76,6 +76,7 @@ install(TARGETS mapcanvas
 
 add_custom_command(TARGET testmapcanvas POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:testmapcanvas> ${CMAKE_BINARY_DIR}/bin/$<TARGET_FILE_NAME:testmapcanvas>
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/default_point_sym.json ${CMAKE_BINARY_DIR}/bin/
 )
 
 

@@ -25,7 +25,7 @@ public:
     double y() const { return _y; }
     void setY(double y) { _y = y; }
 
-    SymPoint transform(const cv::Mat& transformMatrix);
+    SymPoint transform(const cv::Mat& transformMatrix) const;
 private:
     double _x, _y;
 

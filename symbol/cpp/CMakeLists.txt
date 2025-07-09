@@ -43,8 +43,15 @@ list(APPEND HEADERS
   SymSolidFill.h
   SymPoint.h  
   SymShape.h
+  SymSystemLine.h
+  SymArc.h
+  SymChord.h
+  SymPie.h
   SymCircle.h
+  SymEllipse.h
   SymRectangle.h
+  SymLineString.h
+  SymPolygon.h
   SymCanvas.h
   MapSymbol.h
 
@@ -57,8 +64,15 @@ list(APPEND SOURCES
   SymSolidFill.cpp
   SymPoint.cpp
   SymShape.cpp
+  SymSystemLine.cpp
+  SymArc.cpp
+  SymChord.cpp
+  SymPie.cpp
   SymCircle.cpp
+  SymEllipse.cpp
   SymRectangle.cpp
+  SymLineString.cpp
+  SymPolygon.cpp 
   SymCanvas.cpp
   MapSymbol.cpp
 )
@@ -114,6 +128,7 @@ install(TARGETS mapsymbol
 
 add_custom_command(TARGET mapsymbol POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:mapsymbol> ${CMAKE_BINARY_DIR}/bin/$<TARGET_FILE_NAME:mapsymbol>
+
 )
 
 install(FILES ${HEADERS}

@@ -67,7 +67,7 @@ bool SymStroke::fromJson(json_object* jsonObj, std::string& errMsg) {
 
     _dashes.clear();
     json_object* dashesObj;
-    JSON_GET_ARRAY_OBJ(jsonObj, "dashes", dashesObj, errMsg);
+    JSON_GET_ARRAY(jsonObj, "dashes", dashesObj, errMsg);
     for (size_t i = 0; i < json_object_array_length(dashesObj); i++)
     {
         json_object* dashObj = json_object_array_get_idx(dashesObj, i);
@@ -128,7 +128,7 @@ SymStroke::SymStroke(const SymStroke& stroke) {
     _color = stroke._color;
 }
 
-SymStroke *SymStroke::clone() const
+SymStroke* SymStroke::clone() const
 {
     return new SymStroke(*this);
 }
@@ -148,5 +148,11 @@ SkPaint SymStroke::toPaint(double dotsPerMM) const {
     // paint.setPathEffect(SkDashPathEffect::Make(intervals, _dashes.size(), 0.0f));
     SkSpan<float> span(intervals, _dashes.size());
     paint.setPathEffect(SkDashPathEffect::Make(span, 0.0f));
+
+
+    paint.setStrokeCap((SkPaint::Cap)_cap);
+    paint.setStrokeJoin((SkPaint::Join)_join);
+
+
     return paint;
 }

@@ -4,6 +4,7 @@
 #include <opencv4/opencv2/imgproc.hpp>
 #include "SymCircle.h"
 #include "SymRectangle.h"
+
 #include <SkPaint.h>
 #include <SkPath.h>
 
@@ -47,6 +48,27 @@ void SymCanvas::draw(SymShape* shp) {
     case SymShape::SYM_RECTANGLE:
         draw(static_cast<SymRectangle*>(shp));
         break;
+    case SymShape::SYM_POLYGON:
+        draw(static_cast<SymPolygon*>(shp));
+        break;
+    case SymShape::SYM_LINESTRING:
+        draw(static_cast<SymLineString*>(shp));
+        break;
+    case SymShape::SYM_ELLIPSE:
+        draw(static_cast<SymEllipse*>(shp));
+        break;
+    case SymShape::SYM_ARC:
+        draw(static_cast<SymArc*>(shp));
+        break;
+    case SymShape::SYM_CHORD:
+        draw(static_cast<SymChord*>(shp));
+        break;
+    case SymShape::SYM_PIE:
+        draw(static_cast<SymPie*>(shp));
+        break;
+    case SymShape::SYM_SYSTEM_LINE:
+        draw(static_cast<SymSystemLine*>(shp));
+        break;
     default:
         break;
     }
@@ -77,8 +99,8 @@ void SymCanvas::draw(SymRectangle* shp) {
     SymPoint rt = SymPoint(shp->maxX(), shp->maxY()).transform(_transformMatrix);
     SkPath path;
     path.addRect(SkRect::MakeLTRB(
-        lb.x() , lb.y() ,
-        rt.x() , rt.y() ));
+        lb.x(), lb.y(),
+        rt.x(), rt.y()));
     SkPaint paint;
     paint = shp->fill()->toPaint(_dotsPerMM);
     _canvas->drawPath(path, paint);
@@ -87,6 +109,187 @@ void SymCanvas::draw(SymRectangle* shp) {
     _canvas->drawPath(path, paint);
 }
 
+void SymCanvas::draw(SymPolygon* shp) {
+    SkPath path;
+    const std::vector<SymPoint>& points = shp->points();
+    std::vector<SymPoint> transformedPoints;
+    for (auto& pt : points) {
+        transformedPoints.push_back(pt.transform(_transformMatrix));
+    }
+    if (transformedPoints.size() < 2) return;
+
+    path.moveTo(transformedPoints[0].x(), transformedPoints[0].y());
+    for (int i = 1; i < transformedPoints.size(); ++i) {
+        path.lineTo(transformedPoints[i].x(), transformedPoints[i].y());
+    }
+    path.close();
+    SkPaint paint;
+    paint = shp->fill()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
+    paint = shp->stroke()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
+}
+
+
+void SymCanvas::draw(SymLineString* shp) {
+    SkPath path;
+    const std::vector<SymPoint>& points = shp->points();
+    std::vector<SymPoint> transformedPoints;
+    for (auto& pt : points) {
+        transformedPoints.push_back(pt.transform(_transformMatrix));
+    }
+    if (transformedPoints.size() < 2) return;
+
+    path.moveTo(transformedPoints[0].x(), transformedPoints[0].y());
+    for (int i = 1; i < transformedPoints.size(); ++i) {
+        path.lineTo(transformedPoints[i].x(), transformedPoints[i].y());
+    }
+
+    //path.close();
+
+    SkPaint paint;
+    paint = shp->stroke()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
+}
+
+
+void SymCanvas::draw(SymEllipse* shp) {
+
+
+    SymPoint center = shp->center().transform(_transformMatrix);
+    SkRect rect = SkRect::MakeLTRB(
+        center.x() - shp->radiusX() * _dotsPerMM * _width * 0.5,
+        center.y() - shp->radiusY() * _dotsPerMM * _height * 0.5,
+        center.x() + shp->radiusX() * _dotsPerMM * _width * 0.5,
+        center.y() + shp->radiusY() * _dotsPerMM * _height * 0.5);
+    SkPath path;
+    path.addOval(
+        rect
+    );
+
+    SkMatrix matrix;
+
+    matrix.setRotate(-shp->rotation());
+    matrix.preTranslate(-center.x(), -center.y());
+    path.transform(matrix);
+    matrix.reset();
+    matrix.setTranslate(center.x(), center.y());
+    path.transform(matrix);
+
+    SkPaint paint;
+    paint = shp->fill()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
+
+    paint = shp->stroke()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
+}
+
+
+void SymCanvas::draw(SymArc* shp) {
+
+
+    SymPoint center = shp->center().transform(_transformMatrix);
+    SkRect rect = SkRect::MakeLTRB(
+        center.x() - shp->radiusX() * _dotsPerMM * _width * 0.5,
+        center.y() - shp->radiusY() * _dotsPerMM * _height * 0.5,
+        center.x() + shp->radiusX() * _dotsPerMM * _width * 0.5,
+        center.y() + shp->radiusY() * _dotsPerMM * _height * 0.5);
+    SkPath path;
+    path.addArc(
+        rect, shp->startAngle(), shp->startAngle() - shp->endAngle()
+    );
+
+    SkMatrix matrix;
+
+    matrix.setRotate(-shp->rotation());
+    matrix.preTranslate(-center.x(), -center.y());
+    path.transform(matrix);
+    matrix.reset();
+    matrix.setTranslate(center.x(), center.y());
+    path.transform(matrix);
+
+    SkPaint paint;
+    // paint = shp->fill()->toPaint(_dotsPerMM);
+    // _canvas->drawPath(path, paint);
+
+    paint = shp->stroke()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
+}
+
+
+void SymCanvas::draw(SymChord* shp) {
+
+
+    SymPoint center = shp->center().transform(_transformMatrix);
+    SkRect rect = SkRect::MakeLTRB(
+        center.x() - shp->radiusX() * _dotsPerMM * _width * 0.5,
+        center.y() - shp->radiusY() * _dotsPerMM * _height * 0.5,
+        center.x() + shp->radiusX() * _dotsPerMM * _width * 0.5,
+        center.y() + shp->radiusY() * _dotsPerMM * _height * 0.5);
+    SkPath path;
+    path.addArc(
+        rect, shp->startAngle(), shp->startAngle() - shp->endAngle()
+    );
+    path.close();
+
+    SkMatrix matrix;
+
+    matrix.setRotate(-shp->rotation());
+    matrix.preTranslate(-center.x(), -center.y());
+    path.transform(matrix);
+    matrix.reset();
+    matrix.setTranslate(center.x(), center.y());
+    path.transform(matrix);
+
+    SkPaint paint;
+    paint = shp->fill()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
+
+    paint = shp->stroke()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
+}
+
+
+void SymCanvas::draw(SymPie* shp) {
+    SymPoint center = shp->center().transform(_transformMatrix);
+    SkRect rect = SkRect::MakeLTRB(
+        center.x() - shp->radiusX() * _dotsPerMM * _width * 0.5,
+        center.y() - shp->radiusY() * _dotsPerMM * _height * 0.5,
+        center.x() + shp->radiusX() * _dotsPerMM * _width * 0.5,
+        center.y() + shp->radiusY() * _dotsPerMM * _height * 0.5);
+    SkPath path;
+    path.addArc(
+        rect, shp->startAngle(), shp->startAngle() - shp->endAngle()
+    );
+    path.lineTo(center.x(), center.y());
+    path.close();
+
+    SkMatrix matrix;
+
+    matrix.setRotate(-shp->rotation());
+    matrix.preTranslate(-center.x(), -center.y());
+    path.transform(matrix);
+    matrix.reset();
+    matrix.setTranslate(center.x(), center.y());
+    path.transform(matrix);
+
+    SkPaint paint;
+    paint = shp->fill()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
+
+    paint = shp->stroke()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
+}
+
+void SymCanvas::draw(SymSystemLine* shp) {
+    SymPoint l = SymPoint(-1, 0).transform(_transformMatrix);
+    SymPoint r = SymPoint(1, 0).transform(_transformMatrix);
+    SkPath path;
+    path.moveTo(l.x(), l.y());
+    path.lineTo(r.x(), r.y());
+    SkPaint paint = shp->stroke()->toPaint(_dotsPerMM);
+    _canvas->drawPath(path, paint);
+}
 
 void SymCanvas::begin() {
     _surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(_width * _dotsPerMM, _height * _dotsPerMM));

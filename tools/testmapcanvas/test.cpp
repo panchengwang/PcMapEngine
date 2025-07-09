@@ -8,50 +8,40 @@
 #include <geos/io/WKTReader.h>
 #include <geos/io/WKTWriter.h>
 
+#include <fstream>
+#include <string>
+#include <filesystem>
+
+std::string readFile(const std::string& filePath) {
+    if (!std::filesystem::exists(filePath)) {
+        throw std::runtime_error("file not exists: " + filePath);
+    }
+
+    std::ifstream file(filePath, std::ios::binary);
+    if (!file.is_open()) {
+        throw std::runtime_error("can not open file: " + filePath);
+    }
+
+    auto fileSize = std::filesystem::file_size(filePath);
+    std::string content(fileSize, '\0');
+
+    file.read(content.data(), fileSize);
+    file.close();
+    return content;
+}
+
 int main(int argc, char** argv) {
 
+    std::cerr << "usage:" << std::endl
+        << "    " << argv[0] << " <default_point_symbol>" << std::endl
+        << "    example: " << argv[0] << " /mnt/e/PcMapEngine/tools/testmapcanvas/default_point_sym.json  > a.png" << std::endl;
     MapCanvas canvas;
 
-    canvas.setDotsPerMM(300 / 25.4);
+    canvas.setDotsPerMM(600 / 25.4);
     canvas.setCanvasSize(200, 160);
     MapSymbol defaultPointSymbol;
-    if (!defaultPointSymbol.fromJson(R"({
-        "width": 10.0,
-        "height":10.0,
-        "shapes":[{
-            "type":"circle",
-            "stroke":{
-                "color":[255, 0, 0, 255],
-                "width":0.5,
-                "cap":"round",
-                "join":"miter",
-                "dashes":[1,0.5]
-            },
-            "fill":{
-                "type":"solid",
-                "color":[255,255,0,127]
-            },
-            "center":[0.0, 0.0],
-            "radius":0.80
-        },{
-            "type":"rectangle",
-            "stroke":{
-                "color":[255, 0, 0, 255],
-                "width":0.1,
-                "cap":"round",
-                "join":"miter",
-                "dashes":[1,0]
-            },
-            "fill":{
-                "type":"solid",
-                "color":[255,0,255,127]
-            },
-            "minx":-0.4,
-            "maxx":0.8,
-            "miny":-0.8,
-            "maxy":0.8
-        }]
-    })")) {
+    // if (!defaultPointSymbol.fromJson(readFile(std::filesystem::canonical(argv[0]).parent_path().c_str() + std::string("/default_point_sym.json")))) {
+    if (!defaultPointSymbol.fromJson(readFile(argv[1]))) {
         std::cerr << defaultPointSymbol.getErrorMessage() << std::endl;
         return 1;
     }
@@ -73,14 +63,14 @@ int main(int argc, char** argv) {
     canvas.draw(geo.get());
 
 
-    geo = _wktReader.read("POINT(112 28)");
-    canvas.draw(geo.get());
+    // geo = _wktReader.read("POINT(112 28)");
+    // canvas.draw(geo.get());
 
-    geo = _wktReader.read("POINT(0 40)");
-    canvas.draw(geo.get());
+    // geo = _wktReader.read("POINT(0 40)");
+    // canvas.draw(geo.get());
 
-    geo = _wktReader.read("POINT(-112 28)");
-    canvas.draw(geo.get());
+    // geo = _wktReader.read("POINT(-112 28)");
+    // canvas.draw(geo.get());
 
     // canvas.draw("LINESTRING(1 2,3 4)");
 

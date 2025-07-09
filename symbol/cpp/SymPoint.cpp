@@ -51,7 +51,7 @@ json_object* SymPoint::toJson() const {
 
 
 
-SymPoint SymPoint::transform(const cv::Mat& transformMatrix) {
+SymPoint SymPoint::transform(const cv::Mat& transformMatrix) const {
     // cv::Mat points = (cv::Mat_<float>(1, 2) <<
     //     _x, _y
     //     );

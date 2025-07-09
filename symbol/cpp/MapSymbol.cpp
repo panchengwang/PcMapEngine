@@ -6,6 +6,14 @@
 #include "JsonUtils.h"
 #include "SymCanvas.h"
 #include "SymRectangle.h"
+#include "SymPolygon.h"
+#include "SymLineString.h"
+#include "SymEllipse.h"
+#include "SymArc.h"
+#include "SymChord.h"
+#include "SymPie.h"
+#include "SymSystemLine.h"
+
 
 MapSymbol::MapSymbol() {
 
@@ -43,7 +51,7 @@ bool MapSymbol::fromJson(json_object* jsonObj) {
     JSON_GET_DOUBLE(jsonObj, "height", _height, _errorMessage);
 
     json_object* shapesObj;
-    JSON_GET_ARRAY_OBJ(jsonObj, "shapes", shapesObj, _errorMessage);
+    JSON_GET_ARRAY(jsonObj, "shapes", shapesObj, _errorMessage);
 
     for (size_t i = 0; i < json_object_array_length(shapesObj); i++) {
         json_object* shapeObj = json_object_array_get_idx(shapesObj, i);
@@ -55,6 +63,27 @@ bool MapSymbol::fromJson(json_object* jsonObj) {
         }
         else if (typestr == "rectangle") {
             shape = new SymRectangle();
+        }
+        else if (typestr == "polygon") {
+            shape = new SymPolygon();
+        }
+        else if (typestr == "linestring") {
+            shape = new SymLineString();
+        }
+        else if (typestr == "ellipse") {
+            shape = new SymEllipse();
+        }
+        else if (typestr == "arc") {
+            shape = new SymArc();
+        }
+        else if (typestr == "chord") {
+            shape = new SymChord();
+        }
+        else if (typestr == "pie") {
+            shape = new SymPie();
+        }
+        else if (typestr == "systemline") {
+            shape = new SymSystemLine();
         }
         else {
             _errorMessage = std::string("Unsupported shape type: ") + typestr;
