@@ -11,7 +11,7 @@ cd $SRC_DIR
 # git clone https://github.com/google/skia.git
 
 cd skia
-python3 tools/git-sync-deps
+# python3 tools/git-sync-deps
 
 bin/gn gen out/Release --args='
     is_debug=false  
@@ -19,12 +19,17 @@ bin/gn gen out/Release --args='
     skia_use_system_libjpeg_turbo=false 
     skia_use_system_libpng=false 
     skia_use_system_zlib=false 
-    skia_use_system_harfbuzz=false 
     skia_use_system_expat=false 
     skia_use_system_icu=false 
     skia_use_system_libwebp=false 
-    skia_use_system_freetype2=false 
-    extra_cflags=["-fPIC"] 
+    skia_use_system_freetype2=true
+    skia_use_fontconfig=true
+    skia_use_harfbuzz=true
+    skia_use_system_harfbuzz=true
+    skia_enable_svg=true
+    skia_use_freetype=true
+    skia_enable_tools=true
+    extra_cflags=["-fPIC","-DSK_FONTMGR_FONTCONFIG_AVAILABLE"] 
 '
 ninja -C out/Release
 

@@ -1,0 +1,27 @@
+{
+  "configurations": [
+    {
+      "name": "ubuntu",
+      "includePath": [
+        "./",
+        "../",
+        "${default}",
+        "${workspaceFolder}",
+        "${workspaceFolder}/canvas/cpp",
+        "${workspaceFolder}/canvas/c",
+        "${workspaceFolder}/symbol/cpp",
+        "/usr/include",
+        "/usr/include/x86_64-linux-gnu/",
+        "/usr/local/include/skia",
+        "/usr/local/include/skia/include/core",
+        "/usr/local/include/skia/include/encode",
+        "/usr/include/opencv4"
+      ],
+      "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
+      "cStandard": "c17",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "linux-gcc-x64"
+    }
+  ],
+  "version": 4
+}

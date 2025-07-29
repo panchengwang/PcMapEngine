@@ -1,0 +1,27 @@
+{
+  "width": 100.0,
+  "height": 100.0,
+  "dotspermm": 3.7795275590551185,
+  "shapes": [
+    {
+      "type": "pie",
+      "stroke": {
+        "color": [0, 0, 0, 255],
+        "width": 0.5,
+        "cap": "butt",
+        "join": "miter",
+        "dashes": [1, 0]
+      },
+      "fill": {
+        "type": "solid",
+        "color": [128, 128, 0, 100]
+      },
+      "center": [0.0, 0.0],
+      "radiusx": 0.35,
+      "radiusy": 0.35,
+      "rotation": 0,
+      "startangle": 0,
+      "endangle": 30
+    }
+  ]
+}

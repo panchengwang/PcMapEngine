@@ -1,0 +1,25 @@
+{
+  "width": 100.0,
+  "height": 100.0,
+  "dotspermm": 3.7795275590551185,
+  "shapes": [
+    {
+      "type": "rectangle",
+      "stroke": {
+        "color": [255, 0, 0, 255],
+        "width": 0.1,
+        "cap": "round",
+        "join": "miter",
+        "dashes": [1, 0]
+      },
+      "fill": {
+        "type": "solid",
+        "color": [255, 0, 255, 127]
+      },
+      "minx": -0.4,
+      "maxx": 0.8,
+      "miny": -0.8,
+      "maxy": 0.8
+    }
+  ]
+}

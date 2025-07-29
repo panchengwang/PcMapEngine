@@ -1,0 +1,26 @@
+{
+  "width": 100.0,
+  "height": 100.0,
+  "dotspermm": 3.7795275590551185,
+  "shapes": [
+    {
+      "type": "star",
+      "stroke": {
+        "color": [0, 0, 0, 255],
+        "width": 1,
+        "cap": "round",
+        "join": "round",
+        "dashes": [1, 0]
+      },
+      "fill": {
+        "type": "solid",
+        "color": [255, 0, 0, 255]
+      },
+      "center": [0.0, 0.0],
+      "radius": 0.9,
+      "radius2": 0.35,
+      "sides": 6,
+      "rotation": 0
+    }
+  ]
+}

@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
-project(mapcanvas)
-add_subdirectory(canvas)
-add_subdirectory(symbol)
+project(PcMapEngine)
+add_subdirectory(engine)
+add_subdirectory(engine_c)
+# add_subdirectory(canvas)
+# add_subdirectory(symbol)
 add_subdirectory(tools)
 
 # mkdir build
