@@ -319,3 +319,16 @@ bool MapSymbol::deserialize(char* data) {
 
     return true;
 }
+
+std::vector<MapSymbol*> MapSymbol::extract() const {
+    std::vector<MapSymbol*> ret;
+    for (size_t i = 0; i < _shapes.size(); i++) {
+        MapSymbol* sym = new MapSymbol();
+        sym->_width = _width;
+        sym->_height = _height;
+        sym->_dotsPerMM = _dotsPerMM;
+        sym->_shapes.push_back(_shapes[i]->clone());
+        ret.push_back(sym);
+    }
+    return ret;
+}

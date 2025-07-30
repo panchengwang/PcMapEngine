@@ -11,8 +11,11 @@ extern "C" {
     typedef void* MAPENGINE_H;
     typedef void* MAPSYMBOL_H;
 
+
+
     MAPSYMBOL_H sym_create();
     void sym_destroy(MAPSYMBOL_H symbol);
+    void sym_destroy_array(MAPSYMBOL_H* symbols, size_t len);
 
     MAPSYMBOL_H sym_from_json(MAPSYMBOL_H symbol, const char* json_str, uint32_t* ok);
     MAPSYMBOL_H sym_from_json_file(MAPSYMBOL_H symbol, const char* json_filename, uint32_t* ok);
@@ -23,6 +26,11 @@ extern "C" {
     MAPSYMBOL_H sym_deserialize(const char* data);
 
     char* sym_to_image(MAPSYMBOL_H symbol, size_t* len);
+
+    MAPSYMBOL_H* sym_extract(MAPSYMBOL_H symbol, size_t* len);
+
+
+
 #ifdef __cplusplus
 }
 #endif

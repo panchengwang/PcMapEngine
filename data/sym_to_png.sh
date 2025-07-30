@@ -1,7 +1,7 @@
 #/sh/bin
 
 CUR_DIR=$(cd $(dirname $0); pwd)
-PREVIEW=$CUR_DIR/../build/bin/sym2img
+PREVIEW=$CUR_DIR/../build/bin/sym2img_c
 for i in $CUR_DIR/*.json
 do
     echo "${PREVIEW} $i"

@@ -36,6 +36,7 @@ public:
     char* serialize(size_t& len) const;
     bool deserialize(char* data);
 
+    std::vector<MapSymbol*> extract() const;
 protected:
     void clear();
 protected:
