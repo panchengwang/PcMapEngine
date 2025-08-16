@@ -1,6 +1,6 @@
 #include "SymEllipse.h"
-#include "../JsonUtils.h"
-#include "../Serialize.h"
+#include "JsonUtils.h"
+#include "Serialize.h"
 
 
 SymEllipse::SymEllipse() {

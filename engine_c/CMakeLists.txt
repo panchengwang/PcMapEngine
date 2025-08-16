@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(PcMapEngine_C LANGUAGES CXX)
+project(mapengine_c LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -77,3 +77,20 @@ add_custom_command(TARGET mapengine_c POST_BUILD
 install(FILES ${HEADERS}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mapengine_c
 )
+
+
+
+set(PROJECT_DESCRIPTION "MapEngine library provided by pcwang, C Wrapper.")
+set(PROJECT_VERSION "1.0.0")
+
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/mapengine_c.pc.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/mapengine_c.pc"
+    @ONLY
+)
+
+install(
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/mapengine_c.pc"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+)
+

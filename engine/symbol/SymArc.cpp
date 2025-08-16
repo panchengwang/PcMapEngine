@@ -1,6 +1,6 @@
 #include "SymArc.h"
-#include "../JsonUtils.h"
-#include "../Serialize.h"
+#include "JsonUtils.h"
+#include "Serialize.h"
 
 SymArc::SymArc() {
     _type = SYM_ARC;

@@ -1,6 +1,6 @@
 #include "SymColor.h"
-#include "../JsonUtils.h"
-#include "../Serialize.h"
+#include "JsonUtils.h"
+#include "Serialize.h"
 #include <string.h>
 
 SymColor::SymColor() {

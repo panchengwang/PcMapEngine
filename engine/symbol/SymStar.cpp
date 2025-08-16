@@ -1,6 +1,6 @@
 #include "SymStar.h"
-#include "../JsonUtils.h"
-#include "../Serialize.h"
+#include "JsonUtils.h"
+#include "Serialize.h"
 
 #include <cmath>
 #include <math.h>

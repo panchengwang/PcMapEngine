@@ -1,6 +1,6 @@
 #include "SymRegularPolygon.h"
-#include "../JsonUtils.h"
-#include "../Serialize.h"
+#include "JsonUtils.h"
+#include "Serialize.h"
 
 #include <cmath>
 #include <math.h>

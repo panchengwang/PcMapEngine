@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(PcMapEngine LANGUAGES CXX)
+project(mapengine LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -11,7 +11,7 @@ elseif(WIN32)
 endif()
 # add_compile_options( -Wextra -Wpedantic -Wno-unused-result)
 
-
+find_package( Eigen3 REQUIRED )
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSON_C REQUIRED json-c)
 pkg_check_modules(GEOS REQUIRED geos)
@@ -85,11 +85,13 @@ list(APPEND SYMBOL_SOURCES
 
 list(APPEND CANVAS_HEADERS    
   canvas/MapCanvas.h
+  canvas/AffineTransformer.h
   canvas/AffineTransformOperation.h
 )
 
 list(APPEND CANVAS_SOURCES 
   canvas/MapCanvas.cpp
+  canvas/AffineTransformer.cpp
   canvas/AffineTransformOperation.cpp
 )
 
@@ -107,6 +109,7 @@ target_link_libraries(mapengine
   ${UUID_LIBRARIES}
   ${OPENCV4_LIBRARIES}
   ${CAIRO_LIBRARIES}
+  ${EIGEN3_LIBRARIES}
   geos
 )
 target_compile_definitions(mapengine PRIVATE AS_LIBRARY)
@@ -120,6 +123,7 @@ target_include_directories(mapengine PUBLIC
   ${CAIRO_INCLUDE_DIRS}
   ${UUID_INCLUDE_DIRS}
   ${OPENCV4_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
   ${CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES}
   
 )
@@ -131,14 +135,16 @@ target_link_directories(mapengine PUBLIC
   ${CAIRO_LIBRARY_DIRS}
   ${UUID_LIBRARY_DIRS}
   ${OPENCV4_LIBRARY_DIRS}
-
+  ${EIGEN3_LIBRARY_DIRS}
 )
+
 target_compile_options(mapengine PUBLIC 
   ${JSON_C_CFLAGS_OTHER}
   ${GEOS_CFLAGS_OTHER}
   ${JSON_C_CFLAGS_OTHER}
   ${CAIRO_CFLAGS_OTHER}
-  ${OPENCV4_LIBRARY_DIRS}
+  ${OPENCV4_LIBRARY_OTHER}
+  ${EIGEN3_LIBRARY_OTHER}
 )
 
 include(GNUInstallDirs)
@@ -154,4 +160,18 @@ add_custom_command(TARGET mapengine POST_BUILD
 
 install(FILES ${HEADERS}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mapengine
+)
+
+set(PROJECT_DESCRIPTION "MapEngine library provided by pcwang.")
+set(PROJECT_VERSION "1.0.0")
+
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/mapengine.pc.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/mapengine.pc"
+    @ONLY
+)
+
+install(
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/mapengine.pc"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
 )

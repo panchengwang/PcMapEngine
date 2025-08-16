@@ -1,5 +1,5 @@
 #include "SymCanvas.h"
-#include "../SymMath.h"
+#include "SymMath.h"
 
 #include <vector>
 #include <opencv4/opencv2/core.hpp>
@@ -7,7 +7,7 @@
 #include "SymCircle.h"
 #include "SymRectangle.h"
 #include "SymSolidFill.h"
-
+#include <cairo/cairo.h>
 
 SymCanvas::SymCanvas() {
     set(10, 10, 96.0 / 25.4);
@@ -622,7 +622,7 @@ void SymCanvas::begin() {
 
     _surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, _width * _dotsPerMM, _height * _dotsPerMM);
     _canvas = cairo_create(_surface);
-
+    cairo_set_antialias(_canvas, CAIRO_ANTIALIAS_SUBPIXEL);
     cairo_set_operator(_canvas, CAIRO_OPERATOR_SOURCE);
     cairo_set_source_rgba(_canvas, 0, 0, 0, 0);  // 全透明
     cairo_paint(_canvas);
@@ -686,4 +686,26 @@ char* SymCanvas::data(size_t& size) {
     return buffer.data;
 }
 
+/**
+ * @brief Get a copy of the cairo surface.
+ * This function creates a new cairo surface that is a copy of the original surface.
+ * @return A pointer to the new cairo surface. The caller is responsible for destroying this surface.
+ * The caller must call cairo_surface_destroy() on the returned surface when it is no longer needed.
+ */
+cairo_surface_t* SymCanvas::cairoSurface() const {
+    // cairo_surface_t* copy = cairo_surface_create_similar(
+    //     _surface,
+    //     cairo_surface_get_content(_surface),
+    //     cairo_image_surface_get_width(_surface),
+    //     cairo_image_surface_get_height(_surface)
+    // );
+    // cairo_t* cr = cairo_create(copy);
+    // cairo_set_source_surface(cr, _surface, 0, 0);
+    // cairo_paint(cr);
+    // cairo_destroy(cr);
+    // return copy;
+    // return cairo_image_surface_copy(_surface);
+
+    return cairo_surface_reference(_surface);  // 返回对原始表面的引用，避免创建新的副本
+}
 

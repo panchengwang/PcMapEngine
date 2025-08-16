@@ -1,28 +1,37 @@
 #include "AffineTransformOperation.h"
 
 void AffineTransformOperation::setMatirx(cv::Mat& matrix) {
-    this->a = matrix.at<double>(0, 0);
-    this->b = matrix.at<double>(0, 1);
-    this->e = matrix.at<double>(0, 2);
-    this->c = matrix.at<double>(1, 0);
-    this->d = matrix.at<double>(1, 1);
-    this->f = matrix.at<double>(1, 2);
+    this->_a = matrix.at<double>(0, 0);
+    this->_b = matrix.at<double>(0, 1);
+    this->_e = matrix.at<double>(0, 2);
+    this->_c = matrix.at<double>(1, 0);
+    this->_d = matrix.at<double>(1, 1);
+    this->_f = matrix.at<double>(1, 2);
 }
 
 
+void AffineTransformOperation::setMatrix(double a, double b, double c, double d, double e, double f) {
+    this->_a = a;
+    this->_b = b;
+    this->_c = c;
+    this->_d = d;
+    this->_e = e;
+    this->_f = f;
+}
+
 AffineTransformOperation::AffineTransformOperation() {
-    a = 1.0;
-    b = 0.0;
-    c = 0.0;
-    d = 1.0;
-    e = 0.0;
-    f = 0.0;
+    _a = 1.0;
+    _b = 0.0;
+    _c = 0.0;
+    _d = 1.0;
+    _e = 0.0;
+    _f = 0.0;
 }
 
 
 
 AffineTransformOperation::AffineTransformOperation(double a, double b, double c, double d, double e, double f)
-    : a(a), b(b), c(c), d(d), e(e), f(f) {
+    : _a(a), _b(b), _c(c), _d(d), _e(e), _f(f) {
 }
 
 
@@ -51,8 +60,8 @@ std::unique_ptr< Geometry > AffineTransformOperation::edit(const geos::geom::Geo
 
             // 矩阵变换: [a b e] [x]   [a*x + b*y + e]
             //          [c d f] [y] = [c*x + d*y + f]
-            double newX = a * x + b * y + e;
-            double newY = c * x + d * y + f;
+            double newX = _a * x + _b * y + _e;
+            double newY = _c * x + _d * y + _f;
 
             newCoords->setAt(geos::geom::Coordinate(newX, newY), i);
         }

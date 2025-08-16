@@ -28,21 +28,21 @@ int main(int argc, char** argv) {
     free(image);
     sym_destroy(symbol);
 
-    MAPSYMBOL_H* syms = sym_extract(sym2, &len);
-    for (size_t i = 0; i < len; ++i) {
-        size_t datasize;
-        image = sym_to_image(syms[i], &datasize);
-        char filename[256];
-        sprintf(filename, "%s_%d.png", argv[1], i);
-        FILE* fd = fopen(filename, "wb");
-        fwrite(image, datasize, 1, fd);
-        fclose(fd);
-        free(image);
-    }
-    for (size_t i = 0; i < len; ++i) {
-        sym_destroy(syms[i]);
-    }
-    free(syms);
+    // MAPSYMBOL_H* syms = sym_extract(sym2, &len);
+    // for (size_t i = 0; i < len; ++i) {
+    //     size_t datasize;
+    //     image = sym_to_image(syms[i], &datasize);
+    //     char filename[256];
+    //     sprintf(filename, "%s_%d.png", argv[1], i);
+    //     FILE* fd = fopen(filename, "wb");
+    //     fwrite(image, datasize, 1, fd);
+    //     fclose(fd);
+    //     free(image);
+    // }
+    // for (size_t i = 0; i < len; ++i) {
+    //     sym_destroy(syms[i]);
+    // }
+    // free(syms);
 
 
     sym_destroy(sym2);

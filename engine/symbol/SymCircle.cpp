@@ -1,6 +1,6 @@
 #include "SymCircle.h"
-#include "../JsonUtils.h"
-#include "../Serialize.h"
+#include "JsonUtils.h"
+#include "Serialize.h"
 #include "SymSolidFill.h"
 
 SymCircle::SymCircle() {

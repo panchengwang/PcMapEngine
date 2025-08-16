@@ -5,21 +5,17 @@
 #include <geos.h>
 #include <iostream>
 #include <string>
-// #include <SkSurface.h>
-// #include <SkCanvas.h>
 #include <opencv4/opencv2/opencv.hpp>
 #include <geos/geom/GeometryFactory.h>
 #include <geos/geom/util/GeometryEditor.h>
 #include "AffineTransformOperation.h"
+
 #include "../symbol/MapSymbol.h"
+#include "../symbol/SymShape.h"
+#include "../symbol/SymSystemLine.h"
 #include <cairo.h>
 
-/**
- * @class MapCanvas
- * @brief MapCanvas 类用于绘制地图的画布。
- *
- * MapCanvas 类提供一个用于在图形界面上显示地图的画布。MapCanvas在绘制是使用的长度单位为毫米(mm)。
- */
+
 class DLL_EXPORT MapCanvas {
 public:
     MapCanvas();
@@ -38,10 +34,14 @@ public:
     void setDefaultLineSymbol(const MapSymbol& symbol);
     void setDefaultFillSymbol(const MapSymbol& symbol);
 
+    void setStrokeStyle(SymShape* shp);
 
     void draw(const geos::geom::Geometry* geom);
     void draw(const geos::geom::Point* geom);
+
     void draw(const geos::geom::LineString* geom);
+    void draw(const geos::geom::LineString* geom, SymSystemLine* symshp);
+
     void draw(const geos::geom::Polygon* geom);
     void draw(const geos::geom::GeometryCollection* geom);
 
@@ -50,15 +50,15 @@ public:
     bool begin();
     bool end();
 
-    char* data(size_t& len);
+    char* imageData(size_t& size);
     void log();
 
 protected:
     void recalculateMapParameters();
     std::string createUUID();
-
     geos::geom::Geometry::Ptr mapToCanvas(const geos::geom::Geometry* geom);
 
+    void initDefaultSymbols();
 private:
 
     double _minX, _maxX, _minY, _maxY;
@@ -67,7 +67,7 @@ private:
     double _centerX, _centerY;
     double _scale;
     cairo_surface_t* _surface;
-    cairo_t* _canvas;
+    cairo_t* _cairo;
     std::string _format;
     std::string _filename;
 

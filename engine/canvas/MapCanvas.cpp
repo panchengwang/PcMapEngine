@@ -13,7 +13,7 @@
 #include <filesystem>
 #include <opencv4/opencv2/opencv.hpp>
 #include <geos/geom/util/GeometryEditor.h>
-
+#include "AffineTransformer.h"
 
 MapCanvas::MapCanvas() {
     _dotsPerMM = 96.0 / 25.4;
@@ -27,38 +27,16 @@ MapCanvas::MapCanvas() {
     _centerY = 0;
     recalculateMapParameters();
     _surface = NULL;
-    _canvas = NULL;
+    _cairo = NULL;
     setFormat("PNG");
 
-    // 创建一个临时文件路径，并将其赋值给_filename变量。
     _filename = createUUID();
     _geomFactory = geos::geom::GeometryFactory::create();
     _geomEditor = geos::geom::util::GeometryEditor(_geomFactory.get());
     _affineOperator.setGeometryFactory(_geomFactory.get());
     _wktReader = geos::io::WKTReader(_geomFactory.get());
 
-    if (!_defaultPointSymbol.fromJson(R"({
-        "width": 10.0,
-        "height":10.0,
-        "shapes":[{
-            "type":"circle",
-            "stroke":{
-                "color":[255, 0, 0, 255],
-                "width":1.0,
-                "cap":"round",
-                "join":"miter",
-                "dashes":[10,0]
-            },
-            "fill":{
-                "type":"solid",
-                "color":[255,0,0,127]
-            },
-            "center":[0.0, 0.0],
-            "radius":0.80
-        }]
-    })")) {
-        std::cerr << _defaultPointSymbol.getErrorMessage() << std::endl;
-    }
+    initDefaultSymbols();
 }
 
 
@@ -73,15 +51,65 @@ MapCanvas::MapCanvas(const geos::geom::Envelope& env, double width, double heigh
     _centerX = (_minX + _maxX) * 0.5;
     _centerY = (_minY + _maxY) * 0.5;
     recalculateMapParameters();
-    _canvas = NULL;
+    _surface = NULL;
+    _cairo = NULL;
+
     setFormat("PNG");
     _filename = createUUID();
     _geomFactory = geos::geom::GeometryFactory::create();
     _geomEditor = geos::geom::util::GeometryEditor(_geomFactory.get());
     _affineOperator.setGeometryFactory(_geomFactory.get());
     _wktReader = geos::io::WKTReader(_geomFactory.get());
+
+    initDefaultSymbols();
 }
 
+
+void MapCanvas::initDefaultSymbols() {
+    _defaultPointSymbol.fromJson(R"({
+        "width": 3.0,
+        "height": 3.0,
+        "dotspermm": 3.7795275590551185,
+        "shapes": [
+          {
+            "type": "regularpolygon",
+            "stroke": {
+              "color": [0, 0, 0, 255],
+              "width": 0.1,
+              "cap": "round",
+              "join": "round",
+              "dashes": [1, 0]
+            },
+            "fill": {
+              "type": "solid",
+              "color": [255, 0, 255, 127]
+            },
+            "center": [0.0, 0.0],
+            "radius": 0.9,
+            "sides": 8,
+            "rotation": 0
+          }
+        ]
+    })");
+
+    _defaultLineSymbol.fromJson(R"({
+        "width": 100.0,
+        "height": 2,
+        "dotspermm": 3.7795275590551185,
+        "shapes": [{
+            "type": "systemline",
+            "stroke": {
+                "color": [0, 0, 0, 255],
+                "width": 0.2,
+                "cap": "butt",
+                "join": "miter",
+                "dashes": [2, 0]
+            }
+        }]
+    })");
+
+
+}
 
 MapCanvas::~MapCanvas() {
 
@@ -92,27 +120,38 @@ void MapCanvas::recalculateMapParameters() {
     double sy = _height / (_maxY - _minY);
     _scale = (sx < sy) ? sx : sy;
 
-    _minX = _centerX - (_width * 0.5) * _scale;
-    _maxX = _centerX + (_width * 0.5) * _scale;
-    _minY = _centerY - (_height * 0.5) * _scale;
-    _maxY = _centerY + (_height * 0.5) * _scale;
+    _minX = _centerX - (_width * 0.5) / _scale;
+    _maxX = _centerX + (_width * 0.5) / _scale;
+    _minY = _centerY - (_height * 0.5) / _scale;
+    _maxY = _centerY + (_height * 0.5) / _scale;
 
 
-    std::vector<cv::Point2f> srcPoints = {
-        cv::Point2f(_minX, _maxY),    // 左上
-        cv::Point2f(_minX, _minY),   // 左下
-        cv::Point2f(_maxX, _minY)  // 右下
-    };
+    // std::vector<cv::Point2f> srcPoints = {
+    //     cv::Point2f(_minX, _maxY),    // 左上
+    //     cv::Point2f(_minX, _minY),   // 左下
+    //     cv::Point2f(_maxX, _minY)  // 右下
+    // };
 
-    std::vector<cv::Point2f> dstPoints = {
-        cv::Point2f(0, 0),   // 变换后左上
-        cv::Point2f(0, _height * _dotsPerMM),  // 变换后左下
-        cv::Point2f(_width * _dotsPerMM, _height * _dotsPerMM)  // 变换后右下
-    };
-    cv::Mat transformMatrix = cv::getAffineTransform(srcPoints, dstPoints);
-    _transformMatrix = transformMatrix;
+    // std::vector<cv::Point2f> dstPoints = {
+    //     cv::Point2f(0, 0),   // 变换后左上
+    //     cv::Point2f(0, _height * _dotsPerMM),  // 变换后左下
+    //     cv::Point2f(_width * _dotsPerMM, _height * _dotsPerMM)  // 变换后右下
+    // };
+    // cv::Mat transformMatrix = cv::getAffineTransform(srcPoints, dstPoints);
+    // _transformMatrix = transformMatrix;
+    // _affineOperator.setMatirx(_transformMatrix);
+    // _affineOperator.log();
 
-    _affineOperator.setMatirx(_transformMatrix);
+    AffineTransformer _affineTransformer;
+    _affineTransformer.from3ControlPoints(
+        _minX, _maxY, _minX, _minY, _maxX, _minY,
+        0, 0, 0, _height * _dotsPerMM, _width * _dotsPerMM, _height * _dotsPerMM
+    );
+    _affineOperator.setMatrix(
+        _affineTransformer.a(), _affineTransformer.b(),
+        _affineTransformer.c(), _affineTransformer.d(),
+        _affineTransformer.e(), _affineTransformer.f()
+    );
 }
 
 
@@ -165,12 +204,10 @@ bool MapCanvas::begin() {
 
     if (_format == "png" || _format == "jpg" || _format == "jpeg") {
         _surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, _width * _dotsPerMM, _height * _dotsPerMM);
-        _canvas = cairo_create(_surface);
-        // _surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(_width * _dotsPerMM, _height * _dotsPerMM));
-        // _canvas = _surface->getCanvas();
+        _cairo = cairo_create(_surface);
     }
     else if (_format == "pdf") {
-        // _canvas = SkCanvas::MakePDF(_filename.c_str(), _width * _dotsPerMM, _height * _dotsPerMM);
+
         return false;
     }
     else {
@@ -178,14 +215,15 @@ bool MapCanvas::begin() {
     }
 
 
-    if (_canvas != NULL) {
-        cairo_set_operator(_canvas, CAIRO_OPERATOR_SOURCE);
-        cairo_set_source_rgba(_canvas, 0, 0, 0, 0);  // 全透明
-        cairo_paint(_canvas);
-
+    if (_cairo != NULL) {
+        cairo_set_operator(_cairo, CAIRO_OPERATOR_SOURCE);
+        cairo_set_source_rgba(_cairo, 0, 0, 0, 0);
+        cairo_paint(_cairo);
+        cairo_set_operator(_cairo, CAIRO_OPERATOR_OVER);
+        cairo_set_antialias(_cairo, CAIRO_ANTIALIAS_DEFAULT);
     }
 
-    return false;
+    return true;
 }
 
 
@@ -195,8 +233,8 @@ geos::geom::Geometry::Ptr MapCanvas::mapToCanvas(const geos::geom::Geometry* geo
 }
 
 bool MapCanvas::end() {
-    if (_canvas != NULL) {
-        // _canvas->restore();
+    if (_surface) {
+        cairo_surface_flush(_surface);
     }
     return true;
 }
@@ -204,26 +242,26 @@ bool MapCanvas::end() {
 
 
 void MapCanvas::log() {
-    std::cerr << "MapCanvas:    minx: " << _minX << ", maxx: " << _maxX << ", miny: " << _minY << ", maxy: " << _maxY << std::endl;
-    std::cerr << "MapCanvas:    centerx: " << _centerX << ", centery: " << _centerY << std::endl;
-    std::cerr << "MapCanvas:    width: " << _width << ", height: " << _height << std::endl;
-    std::cerr << "MapCanvas:    scale: " << _scale << std::endl;
-    std::cerr << "MapCanvas:    dotsPerMM: " << _dotsPerMM << std::endl;
-    std::cerr << "MapCanvas:    format: " << _format << std::endl;
-    std::cerr << "MapCanvas:    filename: " << _filename << std::endl;
+    // std::cerr << "MapCanvas:    minx: " << _minX << ", maxx: " << _maxX << ", miny: " << _minY << ", maxy: " << _maxY << std::endl;
+    // std::cerr << "MapCanvas:    centerx: " << _centerX << ", centery: " << _centerY << std::endl;
+    // std::cerr << "MapCanvas:    width: " << _width << ", height: " << _height << std::endl;
+    // std::cerr << "MapCanvas:    scale: " << _scale << std::endl;
+    // std::cerr << "MapCanvas:    dotsPerMM: " << _dotsPerMM << std::endl;
+    // std::cerr << "MapCanvas:    format: " << _format << std::endl;
+    // std::cerr << "MapCanvas:    filename: " << _filename << std::endl;
 
-    std::cerr << "[ "
-        << _transformMatrix.at<double>(0, 0) << ", "
-        << _transformMatrix.at<double>(0, 1) << ", "
-        << _transformMatrix.at<double>(0, 2) << " ]\n";
+    // std::cerr << "[ "
+    //     << _transformMatrix.at<double>(0, 0) << ", "
+    //     << _transformMatrix.at<double>(0, 1) << ", "
+    //     << _transformMatrix.at<double>(0, 2) << " ]\n";
 
-    std::cerr << "[ "
-        << _transformMatrix.at<double>(1, 0) << ", "
-        << _transformMatrix.at<double>(1, 1) << ", "
-        << _transformMatrix.at<double>(1, 2) << " ]"
-        << std::endl;
+    // std::cerr << "[ "
+    //     << _transformMatrix.at<double>(1, 0) << ", "
+    //     << _transformMatrix.at<double>(1, 1) << ", "
+    //     << _transformMatrix.at<double>(1, 2) << " ]"
+    //     << std::endl;
 
-    std::cerr << _defaultPointSymbol.toJson() << std::endl;
+    // std::cerr << _defaultPointSymbol.toJson() << std::endl;
 }
 
 
@@ -255,36 +293,54 @@ std::string MapCanvas::createUUID() {
 }
 
 
-/**
- * @brief 获取画布数据
- *
- * 根据画布格式获取画布数据。支持 PNG 和 PDF 格式。
- *
- * @param len 数据长度，以字节为单位
- * @return 返回画布数据的指针，如果无法获取数据则返回 NULL.
- *  需要调用者负责释放返回的内存。
- */
-char* MapCanvas::data(size_t& len) {
-    char* buf = NULL;
-    len = 0;
-    if (_format == "png") {
-        // sk_sp<SkImage> img(_surface->makeImageSnapshot());
-        // if (!img) {
-        //     return NULL;
-        // }
-        // sk_sp<SkData> png = SkPngEncoder::Encode(nullptr, img.get(), {});
-        // if (!png) {
-        //     return NULL;
-        // }
-        // len = png->size();
-        // buf = new char[len];
-        // memcpy(buf, png->data(), len);
-    }
-    else if (_format == "pdf") {
-        // return _canvas->pdfDocument()->data();
+typedef struct {
+    char* data;
+    size_t size;
+}PngBuffer;
+
+static cairo_status_t
+my_png_save(void* closure,
+    const unsigned char* data,
+    unsigned int length) {
+    PngBuffer* buffer = (PngBuffer*)closure;
+
+    // 重新分配内存以容纳新数据
+    char* new_data = (char*)realloc(buffer->data, buffer->size + length);
+    if (!new_data) {
+        return CAIRO_STATUS_NO_MEMORY;
     }
 
-    return buf;
+    buffer->data = new_data;
+    memcpy(buffer->data + buffer->size, data, length);
+    buffer->size += length;
+
+    return CAIRO_STATUS_SUCCESS;
+}
+
+
+
+char* MapCanvas::imageData(size_t& size) {
+
+    // cairo_surface_set_device_scale(_surface, _width / 1000.0, _height / 1000.0);
+    cairo_surface_set_fallback_resolution(_surface, _dotsPerMM, _dotsPerMM);
+
+    PngBuffer buffer = { NULL, 0 };
+
+    cairo_surface_write_to_png_stream(_surface, my_png_save, &buffer);
+    size = buffer.size;
+    // std::vector<char> png_data;
+
+    // // 将表面写入内存
+    // cairo_status_t status = cairo_surface_write_to_png_stream(
+    //     _surface,
+    //     [](void* closure, const unsigned char* data, unsigned int length) -> cairo_status_t {
+    //         auto& vec = *static_cast<std::vector<char>*>(closure);
+    //         vec.insert(vec.end(), data, data + length);
+    //         return CAIRO_STATUS_SUCCESS;
+    //     },
+    //     &png_data);
+
+    return buffer.data;
 }
 
 void MapCanvas::draw(const std::string& wkt) {
@@ -327,28 +383,86 @@ void MapCanvas::draw(const geos::geom::Geometry* geom) {
 
 
 void MapCanvas::draw(const geos::geom::Point* geom) {
-
-    // SkPaint paint;
-    // paint.setAntiAlias(true);
-    // paint.setColor(SK_ColorRED);
-    // paint.setStyle(SkPaint::kFill_Style);
-
-    // SkPath path;
-    // path.addCircle(geom->getX(), geom->getY(), 30);
-    // _canvas->drawPath(path, paint);
-    // paint.setStyle(SkPaint::kStroke_Style);
-    // paint.setColor(SK_ColorBLUE);
-    // paint.setStrokeWidth(1);
-    // _canvas->drawPath(path, paint);
-
-    // _canvas->drawCircle(geom->getX(), geom->getY(), 1.0f, SkPaint());
     // std::cerr << "draw point" << std::endl;
-    // sk_sp<SkImage> img = _defaultPointSymbol.createImage(_dotsPerMM);
-    // _canvas->drawImage(img.get(), geom->getX() - img->width() * 0.5, geom->getY() - img->height() * 0.5);
+    // std::cerr << "Point: " << geom->getX() << ", " << geom->getY() << std::endl;
+    _defaultPointSymbol.setDotsPerMM(_dotsPerMM);
+    cairo_surface_t* symsurface = _defaultPointSymbol.cairoSurface();
+    double symwidth = _defaultPointSymbol.getWidth() * _defaultPointSymbol.getDotsPerMM();
+    double symheight = _defaultPointSymbol.getHeight() * _defaultPointSymbol.getDotsPerMM();
+    cairo_save(_cairo);
+    cairo_set_source_surface(_cairo, symsurface, geom->getX() - symwidth * 0.5, geom->getY() - symheight * 0.5);
+    cairo_rectangle(_cairo, geom->getX() - symwidth * 0.5, geom->getY() - symheight * 0.5, symwidth, symheight);
+    cairo_clip(_cairo);
+    cairo_paint(_cairo);
+    cairo_restore(_cairo);
+    cairo_surface_destroy(symsurface);
+}
+
+void MapCanvas::setStrokeStyle(SymShape* shp) {
+    const SymStroke* stroke = shp->stroke();
+    const SymColor& color = stroke->color();
+    cairo_set_source_rgba(_cairo, color.red() / 255.0, color.green() / 255.0, color.blue() / 255.0, color.alpha() / 255.0);
+    double linewidth = round(stroke->width() * _dotsPerMM);
+    linewidth = std::max(1.0, linewidth);
+    cairo_set_line_width(_cairo, linewidth);
+
+    if (stroke->cap() == SymStroke::CAP_ROUND) {
+        cairo_set_line_cap(_cairo, CAIRO_LINE_CAP_ROUND);
+    }
+    else if (stroke->cap() == SymStroke::CAP_SQUARE) {
+        cairo_set_line_cap(_cairo, CAIRO_LINE_CAP_SQUARE);
+    }
+    else if (stroke->cap() == SymStroke::CAP_BUTT) {
+        cairo_set_line_cap(_cairo, CAIRO_LINE_CAP_BUTT);
+    }
+
+    if (stroke->join() == SymStroke::JOIN_ROUND) {
+        cairo_set_line_join(_cairo, CAIRO_LINE_JOIN_ROUND);
+    }
+    else if (stroke->join() == SymStroke::JOIN_BEVEL) {
+        cairo_set_line_join(_cairo, CAIRO_LINE_JOIN_BEVEL);
+    }
+    else if (stroke->join() == SymStroke::JOIN_MITER) {
+        cairo_set_line_join(_cairo, CAIRO_LINE_JOIN_MITER);
+    }
+
+    std::vector<double> dashes = stroke->dashes();
+    for (auto& dash : dashes) {
+        dash *= _dotsPerMM;
+    }
+    cairo_set_dash(_cairo, dashes.data(), dashes.size(), 0);
+
+}
+
+void MapCanvas::draw(const geos::geom::LineString* geom, SymSystemLine* symshp) {
+    if (!geom || geom->isEmpty()) return;
+
+    cairo_save(_cairo);
+
+    std::unique_ptr<geos::geom::CoordinateSequence> coords = geom->getCoordinates();
+    geos::geom::Coordinate& firstCoord = coords->getAt(0);
+    cairo_move_to(_cairo, floor(firstCoord.x) + 0.5, floor(firstCoord.y) + 0.5);
+    for (size_t i = 1; i < coords->size(); ++i) {
+        const geos::geom::Coordinate& coord = coords->getAt(i);
+        cairo_line_to(_cairo, floor(coord.x) + 0.5, floor(coord.y) + 0.5);
+    }
+
+    setStrokeStyle(symshp);
+
+    cairo_stroke(_cairo);
+    cairo_restore(_cairo);
+
+
 }
 
 void MapCanvas::draw(const geos::geom::LineString* geom) {
-    std::cerr << "draw linestring" << std::endl;
+    size_t nsymshp = _defaultLineSymbol.getShapeCount();
+    for (int i = 0; i < nsymshp; ++i) {
+        const SymShape* shp = _defaultLineSymbol.getShape(i);
+        if (shp->type() == SymShape::SYM_SYSTEM_LINE) {
+            draw(geom, (SymSystemLine*)shp);
+        }
+    }
 }
 
 void MapCanvas::draw(const geos::geom::Polygon* geom) {

@@ -1,6 +1,6 @@
 #include "SymPie.h"
-#include "../JsonUtils.h"
-#include "../Serialize.h"
+#include "JsonUtils.h"
+#include "Serialize.h"
 
 
 SymPie::SymPie() {

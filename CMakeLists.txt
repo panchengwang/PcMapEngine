@@ -11,3 +11,9 @@ add_subdirectory(tools)
 # cmake -DCMAKE_INSTALL_PREFIX=`pg_config --bindir`/.. -DCMAKE_BUILD_TYPE=Release ..
 # cmake --build .
 # cmake --build . --target install 
+include(GNUInstallDirs)
+file(GLOB SYMBOL_FILES "data/*.json")
+install(
+    FILES ${SYMBOL_FILES}
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/mapengine"
+)

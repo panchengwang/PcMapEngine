@@ -9,6 +9,7 @@
 #include <json-c/json.h>
 // #include <SkImage.h>
 #include <iostream>
+#include <cairo/cairo.h>
 
 class DLL_EXPORT MapSymbol
 {
@@ -30,13 +31,27 @@ public:
     // sk_sp<SkImage> createImage(double dotsPerMM) const;
 
     char* imageData(size_t& size) const;
+    cairo_surface_t* cairoSurface() const;
     MapSymbol& operator=(const MapSymbol& other);
     size_t memsize() const;
 
     char* serialize(size_t& len) const;
     bool deserialize(char* data);
 
+    void setDotsPerMM(double dotsPerMM);
+
     std::vector<MapSymbol*> extract() const;
+    size_t getShapeCount() const;
+    void appendShape(SymShape* shape);
+    const SymShape* getShape(size_t idx) const;
+
+    double getWidth() const;
+    double getHeight() const;
+    double getDotsPerMM() const;
+    void setWidth(double width);
+    void setHeight(double height);
+
+
 protected:
     void clear();
 protected:

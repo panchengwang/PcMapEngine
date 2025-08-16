@@ -13,7 +13,7 @@ class SymShape
 {
     friend class SymCanvas;
 public:
-    enum {
+    enum SHAPE_TYPE {
         SYM_NONE = 0,
         SYM_SYSTEM_LINE,
         SYM_LINESTRING,

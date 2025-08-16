@@ -89,9 +89,10 @@ MAPSYMBOL_H sym_from_json_file(MAPSYMBOL_H symbol, const char* json_filename, ui
 char* sym_to_json(MAPSYMBOL_H symbol, int32_t* len) {
     MapSymbol* sym = (MapSymbol*)symbol;
     std::string json_str = sym->toJson();
-    char* cstr = (char*)malloc(json_str.size() + 1);
-    memcpy(cstr, json_str.c_str(), json_str.size());
-    cstr[json_str.size()] = '\0';
+    *len = json_str.size();
+    char* cstr = (char*)malloc(*len + 1);
+    memcpy(cstr, json_str.c_str(), *len);
+    cstr[*len] = '\0';
     return cstr;
 }
 
@@ -162,6 +163,7 @@ const char* sym_get_error_message(MAPSYMBOL_H symbol) {
  *      sym_destroy_array(symarr, len);
  * @param symbol The MapSymbol object to extract data from.
  * @param len The length of the extracted symbol array.
+ *
  */
 MAPSYMBOL_H* sym_extract(MAPSYMBOL_H symbol, size_t* len) {
     std::vector<MapSymbol*> syms = ((MapSymbol*)symbol)->extract();
@@ -171,4 +173,41 @@ MAPSYMBOL_H* sym_extract(MAPSYMBOL_H symbol, size_t* len) {
         symarr[i] = (MAPSYMBOL_H)syms[i];
     }
     return symarr;
+}
+
+/**
+ * @brief Gets a specific shape from a MapSymbol object as a new MapSymbol object.
+ * @param symbol The MapSymbol object to get the shape from.
+ * @param idx The index of the shape to get.
+ * @return A new MapSymbol object containing the specified shape.
+ *     The caller is responsible for releasing the memory allocated by this function.
+ *     To free the memory allocated by this function, use:
+ *          sym_destroy;
+ */
+MAPSYMBOL_H sym_get_shape_as_symbol(MAPSYMBOL_H symbol, size_t idx) {
+    MapSymbol* sym = (MapSymbol*)symbol;
+    if (idx >= sym->getShapeCount()) {
+        return nullptr;
+    }
+
+    const SymShape* shape = sym->getShape(idx);
+
+    MapSymbol* ret = new MapSymbol();
+    ret->setWidth(sym->getWidth());
+    ret->setHeight(sym->getHeight());
+    ret->setDotsPerMM(sym->getDotsPerMM());
+    ret->appendShape(shape->clone());
+    return (MAPSYMBOL_H)ret;
+}
+
+/**
+ * @brief Sets the dots per millimeter for a MapSymbol object.
+ * @param symbol The MapSymbol object to set the dots per millimeter for.
+ * @param dotsPerMM The dots per millimeter value to set.
+ * @return The MapSymbol handler with the updated dots per millimeter.
+ */
+MAPSYMBOL_H sym_set_dotspermm(MAPENGINE_H symbol, double dotsPerMM) {
+    MapSymbol* sym = (MapSymbol*)symbol;
+    sym->setDotsPerMM(dotsPerMM);
+    return symbol;
 }

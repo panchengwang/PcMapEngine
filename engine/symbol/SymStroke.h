@@ -39,6 +39,13 @@ public:
     size_t memsize() const;
     char* serialize(char* p) const;
     char* deserialize(char* data);
+
+    const std::vector<double>& dashes() const;
+    double width() const;
+    CapStyle cap() const;
+    JoinStyle join() const;
+    const SymColor& color() const;
+
 protected:
     CapStyle _cap;
     JoinStyle _join;

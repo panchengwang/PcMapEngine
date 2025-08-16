@@ -3,8 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
-#include "../JsonUtils.h"
-#include "../Serialize.h"
+#include "JsonUtils.h"
+#include "Serialize.h"
 #include "SymShape.h"
 #include "SymCircle.h"
 #include "SymCanvas.h"
@@ -50,7 +50,18 @@ bool MapSymbol::fromJson(const std::string& jsonstr) {
 }
 
 
-
+/**
+ * @brief Load a MapSymbol from a JSON object.
+ * This function populates the MapSymbol object with properties and shapes from the provided JSON object.
+ * @param jsonObj The JSON object containing the MapSymbol data.
+ * @return True if the JSON object was successfully parsed and the MapSymbol was populated, false otherwise.
+ * If the JSON object is invalid or missing required fields, an error message is set. Use getErrorMessage() to retrieve it.
+ * @note The JSON object should contain the following fields:
+ * - "width": The width of the symbol.
+ * - "height": The height of the symbol.
+ * - "dotspermm": The dots per millimeter for the symbol.
+ * - "shapes": An array of shape objects, each containing a "type" field
+ */
 bool MapSymbol::fromJson(json_object* jsonObj) {
     clear();
 
@@ -123,6 +134,14 @@ bool MapSymbol::fromJson(json_object* jsonObj) {
 }
 
 
+/**
+ * @brief Load a MapSymbol from a JSON file.
+ * This function reads a JSON file and populates the MapSymbol object with its contents.
+ * @param filename The path to the JSON file.
+ * @return True if the file was successfully read and parsed, false otherwise.
+ * If the file cannot be opened or parsed, an error message is set . Using getErrorMessage() to retrieve it.
+ * @note The JSON file should contain a valid MapSymbol representation.
+ */
 bool MapSymbol::fromJsonFile(const char* filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -141,6 +160,11 @@ bool MapSymbol::fromJsonFile(const char* filename) {
 }
 
 
+/**
+ * @brief Convert the MapSymbol object to a JSON string.
+ * This function creates a JSON object representing the MapSymbol's properties and shapes.
+ * @return A string containing the JSON representation of the MapSymbol.
+ */
 std::string MapSymbol::toJson() const {
     json_object* jsonObj = json_object_new_object();
     json_object_object_add(jsonObj, "width", json_object_new_double(_width));
@@ -160,19 +184,10 @@ std::string MapSymbol::toJson() const {
 }
 
 
-// void MapSymbol::toJson(boost::json::value& jsonValue) const {
-//     boost::json::object& obj = jsonValue.as_object();
-//     obj["width"] = _width;
-//     obj["height"] = _height;
-//     if (_shapes.size() > 0) {
-//         boost::json::array arr;
-//         for (size_t i = 0; i < _shapes.size(); i++) {
-//             arr.push_back(_shapes[i]->toJson());
-//         }
-//         obj["shapes"] = arr;
-//     }
-// }
-
+/**
+ * @brief Clear the MapSymbol object.
+ * This function deletes all shapes in the symbol and clears the shape vector.
+ */
 void MapSymbol::clear() {
     for (size_t i = 0; i < _shapes.size(); i++) {
         delete _shapes[i];
@@ -185,9 +200,12 @@ void MapSymbol::clear() {
 
 
 /**
- * 获取符号的图像数据。
- * 返回的数据请务必使用free()释放内存，不要使用delete释放内存。
- *
+ * @brief Get the image data of the symbol.
+ * The returned data must be freed using free(), not delete.
+ * @param size The size of the image data in bytes.
+ * @return Pointer to the image data. Returns NULL if there is no image data.
+ * This function creates a SymCanvas, draws all shapes onto it, and retrieves the image data.
+ * The image data is returned as a dynamically allocated char array, use free() to release it.
  */
 char* MapSymbol::imageData(size_t& size) const
 {
@@ -201,7 +219,31 @@ char* MapSymbol::imageData(size_t& size) const
     return canvas.data(size);
 }
 
+/**
+ * @brief Get a copy of the cairo surface for the MapSymbol.
+ * This function creates a new SymCanvas, draws all shapes onto it, and returns the cairo surface.
+ * The caller is responsible for destroying the returned surface using cairo_surface_destroy().
+ * @return A pointer to the cairo surface containing the drawn shapes.
+ * The returned surface is a copy of the original surface used in the SymCanvas.
+ * The caller must call cairo_surface_destroy() on the returned surface when it is no longer needed.
+ */
+cairo_surface_t* MapSymbol::cairoSurface() const {
+    SymCanvas canvas;
+    canvas.set(_width, _height, _dotsPerMM);
+    canvas.begin();
+    for (size_t i = 0; i < _shapes.size(); i++) {
+        canvas.draw(_shapes[i]);
+    }
+    canvas.end();
+    return canvas.cairoSurface();
+}
 
+/**
+ * @brief Clone the MapSymbol object.
+ *      This creates a new MapSymbol object with the same properties and shapes as the current one.
+ * @return A pointer to the newly created MapSymbol object.
+ *      The caller is responsible for deleting the returned object.
+ */
 MapSymbol* MapSymbol::clone() const {
     MapSymbol* ret = new MapSymbol();
     ret->_width = _width;
@@ -227,6 +269,12 @@ MapSymbol& MapSymbol::operator=(const MapSymbol& other) {
 
 
 
+/**
+ * @brief Get the memory size of the MapSymbol object.
+ * This function calculates the total memory size used by the MapSymbol object, including its properties and
+ * shapes.
+ * @return The total memory size in bytes.
+ */
 size_t MapSymbol::memsize() const {
     size_t size = 0;
     size += sizeof(_width);
@@ -240,6 +288,13 @@ size_t MapSymbol::memsize() const {
 }
 
 
+/**
+ * @brief Serialize the MapSymbol object to a byte array.
+ * This function converts the MapSymbol's properties and shapes into a byte array for storage or transmission.
+ * @param len The length of the serialized data in bytes.
+ * @return A pointer to the serialized data. The caller is responsible for freeing this memory.
+ * The serialized data includes the width, height, dots per mm, number of shapes, and each shape's serialized data.
+ */
 char* MapSymbol::serialize(size_t& len) const {
     len = memsize();
     char* ret = new char[len];
@@ -257,6 +312,14 @@ char* MapSymbol::serialize(size_t& len) const {
     return ret;
 }
 
+
+/**
+ * @brief Deserialize the MapSymbol object from a byte array.
+ * This function populates the MapSymbol object with properties and shapes from the provided byte array.
+ * @param data The byte array containing the serialized MapSymbol data.
+ * @return True if the deserialization was successful, false otherwise.
+ * If the data is invalid or missing required fields, an error message is set. Use getErrorMessage() to retrieve it.
+ */
 bool MapSymbol::deserialize(char* data) {
     char* p = data;
     DESERIALIZE(p, _width);
@@ -320,6 +383,14 @@ bool MapSymbol::deserialize(char* data) {
     return true;
 }
 
+
+/**
+ * @brief Extract the shapes from the MapSymbol object into a vector of MapSymbol pointers.
+ * This function creates new MapSymbol objects for each shape in the current MapSymbol and returns them in a vector.
+ * Each new MapSymbol will have the same width, height, and dots per mm as the original.
+ * @return A vector of pointers to newly created MapSymbol objects.
+ * The caller is responsible for deleting the returned objects.
+ */
 std::vector<MapSymbol*> MapSymbol::extract() const {
     std::vector<MapSymbol*> ret;
     for (size_t i = 0; i < _shapes.size(); i++) {
@@ -331,4 +402,104 @@ std::vector<MapSymbol*> MapSymbol::extract() const {
         ret.push_back(sym);
     }
     return ret;
+}
+
+
+
+/**
+ * @brief Set the dots per millimeter for the MapSymbol.
+ * This function sets the dots per millimeter value, which is used for scaling the symbol when rendering.
+ * @param dotsPerMM The number of dots per millimeter.
+ */
+void MapSymbol::setDotsPerMM(double dotsPerMM) {
+    _dotsPerMM = dotsPerMM;
+}
+
+
+/**
+ * @brief Get the shape at the specified index.
+ * This function retrieves a pointer to the shape at the given index in the shapes vector.
+ * @param idx The index of the shape to retrieve.
+ * @return A pointer to the shape at the specified index, or nullptr if the index is out of bounds.
+ */
+const SymShape* MapSymbol::getShape(size_t idx) const {
+    if (idx < _shapes.size()) {
+        return _shapes[idx];
+    }
+    return nullptr;
+}
+
+
+/**
+ * @brief Get the number of shapes in the MapSymbol.
+ * This function returns the count of shapes stored in the MapSymbol object.
+ * @return The number of shapes in the MapSymbol.
+ */
+size_t MapSymbol::getShapeCount() const {
+    return _shapes.size();
+}
+
+/**
+ * @brief Get the width of the MapSymbol.
+ * This function returns the width of the MapSymbol in millimeters.
+ * @return The width of the MapSymbol.
+ */
+double MapSymbol::getWidth() const {
+    return _width;
+}
+
+
+/**
+ * @brief Get the height of the MapSymbol.
+ * This function returns the height of the MapSymbol in millimeters.
+ * @return The height of the MapSymbol.
+ */
+double MapSymbol::getHeight() const {
+    return _height;
+}
+
+
+/**
+ * @brief Get the dots per millimeter of the MapSymbol.
+ * This function returns the dots per millimeter value, which is used for scaling the symbol when rendering.
+ * @return The dots per millimeter of the MapSymbol.
+ */
+double MapSymbol::getDotsPerMM() const {
+    return _dotsPerMM;
+}
+
+
+/**
+ * @brief Set the width of the MapSymbol.
+ * This function sets the width of the MapSymbol in millimeters.
+ * @param width The width to set for the MapSymbol.
+ */
+void MapSymbol::setWidth(double width) {
+    _width = width;
+}
+
+
+/**
+ * @brief Set the height of the MapSymbol.
+ * This function sets the height of the MapSymbol in millimeters.
+ * @param height The height to set for the MapSymbol.
+ */
+void MapSymbol::setHeight(double height) {
+    _height = height;
+}
+
+
+/**
+ * @brief Append a shape to the MapSymbol.
+ * This function adds a new shape to the MapSymbol's shapes vector.
+ * @param shape A pointer to the shape to append. If the pointer is null, it is ignored.
+ * The shape is not cloned, so the caller must ensure the shape remains valid for the lifetime of the MapSymbol.
+ * If the shape is null, it will not be added to the shapes vector.
+ * If the symbol is destroyed, the shape will be deleted also.
+ */
+void MapSymbol::appendShape(SymShape* shape)
+{
+    if (shape) {
+        _shapes.push_back(shape);
+    }
 }

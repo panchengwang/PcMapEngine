@@ -1,6 +1,6 @@
 #include "SymRectangle.h"
-#include "../JsonUtils.h"
-#include "../Serialize.h"
+#include "JsonUtils.h"
+#include "Serialize.h"
 
 
 SymRectangle::SymRectangle() {

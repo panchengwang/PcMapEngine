@@ -41,6 +41,7 @@ public:
     void begin();
     void end();
     char* data(size_t& size);
+    cairo_surface_t* cairoSurface() const;
     // sk_sp<SkImage> getImage();
     // sk_sp<SkFontMgr> _fontMgr;
 protected:

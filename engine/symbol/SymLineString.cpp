@@ -1,6 +1,6 @@
 #include "SymLineString.h"
-#include "../JsonUtils.h"
-#include "../Serialize.h"
+#include "JsonUtils.h"
+#include "Serialize.h"
 
 
 SymLineString::SymLineString()

@@ -1,6 +1,6 @@
 #include "SymStroke.h"
-#include "../JsonUtils.h"
-#include "../Serialize.h"
+#include "JsonUtils.h"
+#include "Serialize.h"
 
 #include <algorithm>
 // #include <include/effects/SkDashPathEffect.h> 
@@ -180,24 +180,22 @@ char* SymStroke::deserialize(char* data) {
 }
 
 
-// SkPaint SymStroke::toPaint(double dotsPerMM) const {
-//     SkPaint paint;
-//     paint.setAntiAlias(true);
-//     paint.setStrokeWidth(_width * dotsPerMM);
-//     paint.setStyle(SkPaint::kStroke_Style);
-//     paint.setColor(_color.toSkColor());
-//     float intervals[_dashes.size()];
-//     for (int i = 0; i < _dashes.size(); i++) {
-//         intervals[i] = ceil(_dashes[i] * dotsPerMM);
-//     }
-//     // paint.setPathEffect(SkDashPathEffect::Make(intervals, _dashes.size(), 0.0f));
-//     SkSpan<float> span(intervals, _dashes.size());
-//     paint.setPathEffect(SkDashPathEffect::Make(span, 0.0f));
+const std::vector<double>& SymStroke::dashes() const {
+    return _dashes;
+}
 
+double SymStroke::width() const {
+    return _width;
+}
 
-//     paint.setStrokeCap((SkPaint::Cap)_cap);
-//     paint.setStrokeJoin((SkPaint::Join)_join);
+SymStroke::CapStyle SymStroke::cap() const {
+    return _cap;
+}
 
+SymStroke::JoinStyle SymStroke::join() const {
+    return _join;
+}
 
-//     return paint;
-// }
+const SymColor& SymStroke::color() const {
+    return _color;
+}

@@ -1,5 +1,5 @@
 #include "SymChord.h"
-#include "../Serialize.h"
+#include "Serialize.h"
 
 SymChord::SymChord() {
     _type = SYM_CHORD;
