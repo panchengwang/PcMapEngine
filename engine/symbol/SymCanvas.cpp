@@ -80,6 +80,9 @@ void SymCanvas::draw(SymShape* shp) {
     case SymShape::SYM_SYSTEM_LINE:
         draw(static_cast<SymSystemLine*>(shp));
         break;
+    case SymShape::SYM_SYSTEM_FILL:
+        draw(static_cast<SymSystemFill*>(shp));
+        break;
     case SymShape::SYM_REGULAR_POLYGON:
         draw(static_cast<SymRegularPolygon*>(shp));
         break;
@@ -449,6 +452,29 @@ void SymCanvas::draw(SymSystemLine* shp) {
     // SkPaint paint = shp->stroke()->toPaint(_dotsPerMM);
     // _canvas->drawPath(path, paint);
 }
+
+
+void SymCanvas::draw(SymSystemFill* shp) {
+    SymPoint lb = SymPoint(-1, -1).transform(_transformMatrix);
+    SymPoint rb = SymPoint(1, -1).transform(_transformMatrix);
+    SymPoint rt = SymPoint(1, 1).transform(_transformMatrix);
+    SymPoint lt = SymPoint(-1, 1).transform(_transformMatrix);
+    cairo_save(_canvas);
+    cairo_move_to(_canvas, lb.x(), lb.y());
+    cairo_line_to(_canvas, rb.x(), rb.y());
+    cairo_line_to(_canvas, rt.x(), rt.y());
+    cairo_line_to(_canvas, lt.x(), lt.y());
+    cairo_close_path(_canvas);
+    cairo_restore(_canvas);
+    setFillStyle(shp);
+    cairo_fill(_canvas);
+    // SkPath path;
+    // path.moveTo(l.x(), l.y());
+    // path.lineTo(r.x(), r.y());
+    // SkPaint paint = shp->stroke()->toPaint(_dotsPerMM);
+    // _canvas->drawPath(path, paint);
+}
+
 
 
 void SymCanvas::draw(SymRegularPolygon* shp) {

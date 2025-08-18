@@ -16,6 +16,7 @@ public:
     enum SHAPE_TYPE {
         SYM_NONE = 0,
         SYM_SYSTEM_LINE,
+        SYM_SYSTEM_FILL,
         SYM_LINESTRING,
         SYM_POLYGON,
         SYM_REGULAR_POLYGON,

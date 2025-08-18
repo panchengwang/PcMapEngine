@@ -1,13 +1,13 @@
-#ifndef __SYM_SYSTEM_LINE_H__
-#define __SYM_SYSTEM_LINE_H__
+#ifndef __SYM_SYSTEM_FILL_H__
+#define __SYM_SYSTEM_FILL_H__
 
 #include "SymShape.h"
 
-class SymSystemLine : public SymShape {
+class SymSystemFill : public SymShape {
     friend class SymCanvas;
 public:
-    SymSystemLine();
-    virtual ~SymSystemLine();
+    SymSystemFill();
+    virtual ~SymSystemFill();
 
     bool fromJson(json_object* jsonobj) override;
     json_object* toJson() const override;

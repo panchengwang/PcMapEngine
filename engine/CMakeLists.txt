@@ -45,6 +45,7 @@ list(APPEND SYMBOL_HEADERS
   symbol/SymPoint.h  
   symbol/SymShape.h
   symbol/SymSystemLine.h
+  symbol/SymSystemFill.h
   symbol/SymArc.h
   symbol/SymChord.h
   symbol/SymPie.h
@@ -68,6 +69,7 @@ list(APPEND SYMBOL_SOURCES
   symbol/SymPoint.cpp
   symbol/SymShape.cpp
   symbol/SymSystemLine.cpp
+  symbol/SymSystemFill.cpp
   symbol/SymArc.cpp
   symbol/SymChord.cpp
   symbol/SymPie.cpp

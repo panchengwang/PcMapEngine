@@ -43,12 +43,13 @@ int main(int argc, char** argv) {
 
     size_t len;
     char* buf = symbol.serialize(len);
+    std::cerr << "ok..." << std::endl;
     MapSymbol sym2;
     if (!sym2.deserialize(buf)) {
         std::cerr << sym2.getErrorMessage() << std::endl;
         return -1;
     }
-
+    std::cerr << "ok..." << std::endl;
     char* data = sym2.imageData(len);
     fwrite(data, len, 1, stdout);
 

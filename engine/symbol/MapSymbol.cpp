@@ -16,6 +16,7 @@
 #include "SymChord.h"
 #include "SymPie.h"
 #include "SymSystemLine.h"
+#include "SymSystemFill.h"
 #include "SymRegularPolygon.h"
 #include "SymStar.h"
 #include "SymText.h"
@@ -102,6 +103,9 @@ bool MapSymbol::fromJson(json_object* jsonObj) {
         }
         else if (typestr == "systemline") {
             shape = new SymSystemLine();
+        }
+        else if (typestr == "systemfill") {
+            shape = new SymSystemFill();
         }
         else if (typestr == "regularpolygon") {
             shape = new SymRegularPolygon();
@@ -219,6 +223,10 @@ char* MapSymbol::imageData(size_t& size) const
     return canvas.data(size);
 }
 
+
+
+
+
 /**
  * @brief Get a copy of the cairo surface for the MapSymbol.
  * This function creates a new SymCanvas, draws all shapes onto it, and returns the cairo surface.
@@ -227,16 +235,41 @@ char* MapSymbol::imageData(size_t& size) const
  * The returned surface is a copy of the original surface used in the SymCanvas.
  * The caller must call cairo_surface_destroy() on the returned surface when it is no longer needed.
  */
-cairo_surface_t* MapSymbol::cairoSurface() const {
+ // cairo_surface_t* MapSymbol::cairoSurface() const {
+ //     SymCanvas canvas;
+ //     canvas.set(_width, _height, _dotsPerMM);
+ //     canvas.begin();
+ //     for (size_t i = 0; i < _shapes.size(); i++) {
+ //         canvas.draw(_shapes[i]);
+ //     }
+ //     canvas.end();
+ //     return canvas.cairoSurface();
+ // }
+
+
+ /**
+  * @brief Get a copy of the cairo surface for the MapSymbol.
+  * This function creates a new SymCanvas, draws all shapes onto it, and returns the cairo surface.
+  * The caller is responsible for destroying the returned surface using cairo_surface_destroy().
+  * @param includeSystemShape If true, includes system shapes in the output; otherwise, excludes them.
+  * @return A pointer to the cairo surface containing the drawn shapes.
+  * The returned surface is a copy of the original surface used in the SymCanvas.
+  * The caller must call cairo_surface_destroy() on the returned surface when it is no longer needed.
+  */
+cairo_surface_t* MapSymbol::cairoSurface(bool includeSystemShape) const {
     SymCanvas canvas;
     canvas.set(_width, _height, _dotsPerMM);
     canvas.begin();
     for (size_t i = 0; i < _shapes.size(); i++) {
+        if (!includeSystemShape && (_shapes[i]->type() == SymShape::SYM_SYSTEM_LINE || _shapes[i]->type() == SymShape::SYM_SYSTEM_FILL)) {
+            continue; // Skip system line shapes if not included
+        }
         canvas.draw(_shapes[i]);
     }
     canvas.end();
     return canvas.cairoSurface();
 }
+
 
 /**
  * @brief Clone the MapSymbol object.
@@ -365,6 +398,9 @@ bool MapSymbol::deserialize(char* data) {
             break;
         case SymShape::SYM_SYSTEM_LINE:
             shp = new SymSystemLine();
+            break;
+        case SymShape::SYM_SYSTEM_FILL:
+            shp = new SymSystemFill();
             break;
         case SymShape::SYM_TEXT:
             shp = new SymText();

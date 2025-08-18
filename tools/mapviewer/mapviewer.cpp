@@ -5,9 +5,9 @@
 int main(int argc, char** argv) {
 
     MapCanvas canvas;
-    canvas.setCanvasSize(1000, 1000);
+    canvas.setCanvasSize(500, 500);
     canvas.setEnvelope(-180, 180, -90, 90);
-    canvas.setDotsPerMM(300.0 / 25.4);
+    canvas.setDotsPerMM(144.0 / 25.4);
     canvas.setFormat("png");
 
     if (!canvas.begin()) {

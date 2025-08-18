@@ -36,16 +36,16 @@ public:
 
     void setStrokeStyle(SymShape* shp);
 
-    void draw(const geos::geom::Geometry* geom);
-    void draw(const geos::geom::Point* geom);
+    void draw(const geos::geom::Geometry* geom, MapSymbol* symbol = nullptr, MapSymbol* fillSymbol = nullptr);
+    void draw(const geos::geom::Point* geom, MapSymbol* symbol = nullptr);
 
-    void draw(const geos::geom::LineString* geom);
+    void draw(const geos::geom::LineString* geom, MapSymbol* symbol = nullptr);
     void draw(const geos::geom::LineString* geom, SymSystemLine* symshp);
 
-    void draw(const geos::geom::Polygon* geom);
-    void draw(const geos::geom::GeometryCollection* geom);
+    void draw(const geos::geom::Polygon* geom, MapSymbol* symbol = nullptr, MapSymbol* fillSymbol = nullptr);
+    void draw(const geos::geom::GeometryCollection* geom, MapSymbol* symbol = nullptr, MapSymbol* fillSymbol = nullptr);
 
-    void draw(const std::string& wkt);
+    void draw(const std::string& wkt, MapSymbol* symbol = nullptr, MapSymbol* fillSymbol = nullptr);
 
     bool begin();
     bool end();
@@ -57,8 +57,9 @@ protected:
     void recalculateMapParameters();
     std::string createUUID();
     geos::geom::Geometry::Ptr mapToCanvas(const geos::geom::Geometry* geom);
-
     void initDefaultSymbols();
+    std::vector<geos::geom::Coordinate> getEvenlySpacedPoints(const geos::geom::LineString* line, double spacing);
+
 private:
 
     double _minX, _maxX, _minY, _maxY;

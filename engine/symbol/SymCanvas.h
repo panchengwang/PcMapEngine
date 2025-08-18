@@ -12,6 +12,7 @@
 #include "SymChord.h"
 #include "SymPie.h"
 #include "SymSystemLine.h"
+#include "SymSystemFill.h"
 #include "SymRegularPolygon.h"
 #include "SymStar.h"
 #include "SymText.h"
@@ -34,6 +35,7 @@ public:
     void draw(SymChord* shp);
     void draw(SymPie* shp);
     void draw(SymSystemLine* shp);
+    void draw(SymSystemFill* shp);
     void draw(SymRegularPolygon* shp);
     void draw(SymStar* shp);
     void draw(SymText* shp);

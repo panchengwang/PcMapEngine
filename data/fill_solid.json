@@ -1,0 +1,14 @@
+{
+  "width": 100.0,
+  "height": 100.0,
+  "dotspermm": 3.7795275590551185,
+  "shapes": [
+    {
+      "type": "systemfill",
+      "fill": {
+        "type": "solid",
+        "color": [255, 0, 0, 255]
+      }
+    }
+  ]
+}

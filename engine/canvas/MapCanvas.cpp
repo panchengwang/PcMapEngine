@@ -86,14 +86,14 @@ void MapCanvas::initDefaultSymbols() {
             },
             "center": [0.0, 0.0],
             "radius": 0.9,
-            "sides": 8,
+            "sides": 12,
             "rotation": 0
           }
         ]
     })");
 
     _defaultLineSymbol.fromJson(R"({
-        "width": 100.0,
+        "width": 10.0,
         "height": 2,
         "dotspermm": 3.7795275590551185,
         "shapes": [{
@@ -103,8 +103,25 @@ void MapCanvas::initDefaultSymbols() {
                 "width": 0.2,
                 "cap": "butt",
                 "join": "miter",
-                "dashes": [2, 0]
-            }
+                "dashes": [3, 3]
+            },{
+            "type": "regularpolygon",
+            "stroke": {
+              "color": [0, 0, 0, 255],
+              "width": 0.1,
+              "cap": "round",
+              "join": "round",
+              "dashes": [1, 0]
+            },
+            "fill": {
+              "type": "solid",
+              "color": [255, 0, 255, 127]
+            },
+            "center": [0.0, 0.0],
+            "radius": 0.1,
+            "sides": 4,
+            "rotation": 0
+          }
         }]
     })");
 
@@ -343,13 +360,13 @@ char* MapCanvas::imageData(size_t& size) {
     return buffer.data;
 }
 
-void MapCanvas::draw(const std::string& wkt) {
+void MapCanvas::draw(const std::string& wkt, MapSymbol* symbol, MapSymbol* fillSymbol) {
     auto geo = _wktReader.read(wkt.c_str());
-    draw(geo.get());
+    draw(geo.get(), symbol, fillSymbol);
 }
 
 
-void MapCanvas::draw(const geos::geom::Geometry* geom) {
+void MapCanvas::draw(const geos::geom::Geometry* geom, MapSymbol* symbol, MapSymbol* fillSymbol) {
     if (!geom) return;
     if (geom->isEmpty()) return;
 
@@ -357,22 +374,24 @@ void MapCanvas::draw(const geos::geom::Geometry* geom) {
         _geomEditor.edit(geom, &_affineOperator)
     );
 
+
+
     // 绘制几何对象
     switch (transformedGeometry->getGeometryTypeId()) {
     case geos::geom::GEOS_POINT:
-        draw((const geos::geom::Point*)transformedGeometry.get());
+        draw((const geos::geom::Point*)transformedGeometry.get(), symbol);
         break;
     case geos::geom::GEOS_LINESTRING:
-        draw((const geos::geom::LineString*)transformedGeometry.get());
+        draw((const geos::geom::LineString*)transformedGeometry.get(), symbol);
         break;
     case geos::geom::GEOS_POLYGON:
-        draw((const geos::geom::Polygon*)transformedGeometry.get());
+        draw((const geos::geom::Polygon*)transformedGeometry.get(), symbol, fillSymbol);
         break;
     case geos::geom::GEOS_MULTIPOINT:
     case geos::geom::GEOS_MULTILINESTRING:
     case geos::geom::GEOS_MULTIPOLYGON:
     case geos::geom::GEOS_GEOMETRYCOLLECTION:
-        draw((const geos::geom::GeometryCollection*)transformedGeometry.get());
+        draw((const geos::geom::GeometryCollection*)transformedGeometry.get(), symbol, fillSymbol);
         break;
     default:
         // 处理其他类型的几何对象，例如 GeometryCollection 等
@@ -382,13 +401,15 @@ void MapCanvas::draw(const geos::geom::Geometry* geom) {
 
 
 
-void MapCanvas::draw(const geos::geom::Point* geom) {
-    // std::cerr << "draw point" << std::endl;
-    // std::cerr << "Point: " << geom->getX() << ", " << geom->getY() << std::endl;
-    _defaultPointSymbol.setDotsPerMM(_dotsPerMM);
-    cairo_surface_t* symsurface = _defaultPointSymbol.cairoSurface();
-    double symwidth = _defaultPointSymbol.getWidth() * _defaultPointSymbol.getDotsPerMM();
-    double symheight = _defaultPointSymbol.getHeight() * _defaultPointSymbol.getDotsPerMM();
+void MapCanvas::draw(const geos::geom::Point* geom, MapSymbol* symbol) {
+    if (!geom) return;
+    if (geom->isEmpty()) return;
+    MapSymbol* sym = symbol ? symbol : &_defaultPointSymbol;
+
+    sym->setDotsPerMM(_dotsPerMM);
+    cairo_surface_t* symsurface = sym->cairoSurface();
+    double symwidth = sym->getWidth() * sym->getDotsPerMM();
+    double symheight = sym->getHeight() * sym->getDotsPerMM();
     cairo_save(_cairo);
     cairo_set_source_surface(_cairo, symsurface, geom->getX() - symwidth * 0.5, geom->getY() - symheight * 0.5);
     cairo_rectangle(_cairo, geom->getX() - symwidth * 0.5, geom->getY() - symheight * 0.5, symwidth, symheight);
@@ -434,11 +455,75 @@ void MapCanvas::setStrokeStyle(SymShape* shp) {
 
 }
 
+std::vector<geos::geom::Coordinate>  MapCanvas::getEvenlySpacedPoints(const LineString* line, double spacing) {
+    std::vector<geos::geom::Coordinate> points;
+
+    // if (line->isEmpty() || line->getNumPoints() < 2) {
+    //     return points; // 返回空向量
+    // }
+    // // 获取线串的坐标序列
+    // std::unique_ptr<geos::geom::CoordinateSequence> coords = line->getCoordinates();
+    // if (coords->size() < 2) {
+    //     return points; // 返回空向量
+    // }
+    // // 计算线串的总长度
+    // double totalLength = line->getLength();
+    // // 如果间距大于总长度，则只返回起点和终点
+    // if (spacing >= totalLength) {
+    //     points.push_back(coords->getAt(0));
+    //     points.push_back(coords->getAt(coords->size() - 1));
+    //     return points;
+    // }
+    // // 从起点开始，按间距递增，直到总长度
+    // double currentLength = 0.0;
+    // points.push_back(coords->getAt(0)); // 添加起点
+    // for (size_t i = 1; i < coords->size(); ++i) {
+    //     const geos::geom::Coordinate& start = coords->getAt(i - 1);
+    //     const geos::geom::Coordinate& end = coords->getAt(i);
+    //     double segmentLength = start.distance(end);
+
+    //     // 如果当前段的长度小于间距，则继续累加
+    //     while (currentLength + segmentLength >= spacing) {
+    //         double ratio = (spacing - currentLength) / segmentLength;
+    //         geos::geom::Coordinate newPoint(
+    //             start.x + ratio * (end.x - start.x),
+    //             start.y + ratio * (end.y - start.y)
+    //         );
+    //         points.push_back(newPoint);
+    //         currentLength = 0.0; // 重置当前长度
+    //     }
+    //     currentLength += segmentLength; // 更新当前长度
+    // }
+    // // 确保终点被包含（由于浮点运算可能错过）
+    // if (points.empty() || !(points.back().equals(coords->getAt(coords->size() - 1)))) {
+    //     points.push_back(coords->getAt(coords->size() - 1));
+    // }
+
+
+    // 获取线串总长度
+    double totalLength = line->getLength();
+
+    // 从0开始，按间距递增，直到总长度
+    for (double distance = 0.0; distance <= totalLength; distance += spacing) {
+        // 使用线性参考获取指定距离处的点
+        std::unique_ptr<geos::geom::Point> point(line->getPointN(distance));
+        points.push_back(geos::geom::Coordinate(point->getX(), point->getY()));
+        std::cerr << "get point: " << point->getX() << ", " << point->getY() << std::endl;
+    }
+
+    // 确保终点被包含（由于浮点运算可能错过）
+    // if (points.empty() || !(points.back().equals(*(line->getEndPoint()->getCoordinate())))) {
+    //     points.push_back(*(line->getEndPoint()->getCoordinate()));
+    // }
+
+    return points;
+
+}
+
 void MapCanvas::draw(const geos::geom::LineString* geom, SymSystemLine* symshp) {
     if (!geom || geom->isEmpty()) return;
 
     cairo_save(_cairo);
-
     std::unique_ptr<geos::geom::CoordinateSequence> coords = geom->getCoordinates();
     geos::geom::Coordinate& firstCoord = coords->getAt(0);
     cairo_move_to(_cairo, floor(firstCoord.x) + 0.5, floor(firstCoord.y) + 0.5);
@@ -446,30 +531,53 @@ void MapCanvas::draw(const geos::geom::LineString* geom, SymSystemLine* symshp) 
         const geos::geom::Coordinate& coord = coords->getAt(i);
         cairo_line_to(_cairo, floor(coord.x) + 0.5, floor(coord.y) + 0.5);
     }
-
     setStrokeStyle(symshp);
-
     cairo_stroke(_cairo);
     cairo_restore(_cairo);
 
-
+    // _defaultLineSymbol.setDotsPerMM(_dotsPerMM);
+    // cairo_surface_t* symsurface = _defaultLineSymbol.cairoSurface(false);
+    // double symwidth = _defaultLineSymbol.getWidth() * _defaultLineSymbol.getDotsPerMM();
+    // double symheight = _defaultLineSymbol.getHeight() * _defaultLineSymbol.getDotsPerMM();
+    // cairo_save(_cairo);
+    // cairo_set_source_surface(_cairo, symsurface, geom->getX() - symwidth * 0.5, geom->getY() - symheight * 0.5);
+    // cairo_rectangle(_cairo, geom->getX() - symwidth * 0.5, geom->getY() - symheight * 0.5, symwidth, symheight);
+    // cairo_clip(_cairo);
+    // cairo_paint(_cairo);
+    // cairo_restore(_cairo);
+    // cairo_surface_destroy(symsurface);
 }
 
-void MapCanvas::draw(const geos::geom::LineString* geom) {
-    size_t nsymshp = _defaultLineSymbol.getShapeCount();
+void MapCanvas::draw(const geos::geom::LineString* geom, MapSymbol* symbol) {
+    if (!geom || geom->isEmpty()) return;
+    MapSymbol* mysym = symbol ? symbol : &_defaultLineSymbol;
+    size_t nsymshp = mysym->getShapeCount();
     for (int i = 0; i < nsymshp; ++i) {
-        const SymShape* shp = _defaultLineSymbol.getShape(i);
+        const SymShape* shp = mysym->getShape(i);
         if (shp->type() == SymShape::SYM_SYSTEM_LINE) {
             draw(geom, (SymSystemLine*)shp);
         }
     }
+
+    std::vector<geos::geom::Coordinate> points = getEvenlySpacedPoints(geom, mysym->getWidth() * _dotsPerMM);
+    for (const auto& point : points) {
+        std::cerr << "draw point: " << point.x << ", " << point.y << std::endl;
+        // cairo_save(_cairo);
+        // cairo_arc(_cairo, point.x, point.y, mysym->width() * _dotsPerMM * 0.5, 0, 2 * M_PI);
+        // cairo_set_source_rgba(_cairo, mysym->stroke().color().red() / 255.0,
+        //                        mysym->stroke().color().green() / 255.0,
+        //                        mysym->stroke().color().blue() / 255.0,
+        //                        mysym->stroke().color().alpha() / 255.0);
+        // cairo_fill(_cairo);
+        // cairo_restore(_cairo);
+    }
 }
 
-void MapCanvas::draw(const geos::geom::Polygon* geom) {
+void MapCanvas::draw(const geos::geom::Polygon* geom, MapSymbol* symbol, MapSymbol* fillSymbol) {
     std::cerr << "draw polygon" << std::endl;
 }
 
-void MapCanvas::draw(const geos::geom::GeometryCollection* geom) {
+void MapCanvas::draw(const geos::geom::GeometryCollection* geom, MapSymbol* symbol, MapSymbol* fillSymbol) {
     std::cerr << "draw geometrycollection" << std::endl;
 }
 

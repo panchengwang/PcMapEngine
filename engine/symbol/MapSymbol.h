@@ -31,7 +31,7 @@ public:
     // sk_sp<SkImage> createImage(double dotsPerMM) const;
 
     char* imageData(size_t& size) const;
-    cairo_surface_t* cairoSurface() const;
+    cairo_surface_t* cairoSurface(bool includeSystemShape = true) const;
     MapSymbol& operator=(const MapSymbol& other);
     size_t memsize() const;
 
