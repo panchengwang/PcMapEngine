@@ -11,6 +11,14 @@
 #include <iostream>
 #include <cairo/cairo.h>
 
+
+#define CREATE_SURFACE_WITHOUT_SYSTEM_LINE   0x01
+#define CREATE_SURFACE_WITHOUT_SYSTEM_FILL  0x02
+#define CREATE_SURFACE_WITH_ALL_SHAPES  0x04
+
+
+
+
 class DLL_EXPORT MapSymbol
 {
 public:
@@ -31,7 +39,7 @@ public:
     // sk_sp<SkImage> createImage(double dotsPerMM) const;
 
     char* imageData(size_t& size) const;
-    cairo_surface_t* cairoSurface(bool includeSystemShape = true) const;
+    cairo_surface_t* cairoSurface(uint8_t withShape = CREATE_SURFACE_WITH_ALL_SHAPES) const;
     MapSymbol& operator=(const MapSymbol& other);
     size_t memsize() const;
 

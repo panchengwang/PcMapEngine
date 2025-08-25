@@ -14,10 +14,13 @@ SymLineString::~SymLineString()
 
 
 bool SymLineString::fromJson(json_object* jsonobj) {
-    if (!SymShape::strokeFromJson(jsonobj)) {
+    // if (!SymShape::strokeFromJson(jsonobj)) {
+    //     return false;
+    // }
+
+    if (!SymShape::fromJson(jsonobj)) {
         return false;
     }
-
     json_object* pointarr;
     JSON_GET_ARRAY(jsonobj, "points", pointarr, _errorMessage);
     int len = json_object_array_length(pointarr);
@@ -37,8 +40,8 @@ bool SymLineString::fromJson(json_object* jsonobj) {
 
 json_object* SymLineString::toJson() const {
     json_object* jsonObj = SymShape::toJson();
-    json_object_object_add(jsonObj, "type", json_object_new_string("linestring"));
-    json_object_object_add(jsonObj, "stroke", _stroke->toJson());
+    // json_object_object_add(jsonObj, "type", json_object_new_string("linestring"));
+    // json_object_object_add(jsonObj, "stroke", _stroke->toJson());
 
     json_object* pointarr = json_object_new_array();
     for (auto& pt : _points) {
@@ -54,6 +57,9 @@ json_object* SymLineString::toJson() const {
 
 SymShape* SymLineString::clone() const {
     SymLineString* newLineString = new SymLineString();
+    newLineString->_type = _type;
+    newLineString->_offssetAlongLine = _offssetAlongLine;
+
     newLineString->_stroke = _stroke->clone();
     for (auto& pt : _points) {
         newLineString->_points.push_back(pt);
@@ -68,10 +74,11 @@ const std::vector<SymPoint>& SymLineString::points() const {
 
 
 size_t SymLineString::memsize() const {
-    size_t size = 0;
-    size += sizeof(_type);
-    size += _stroke->memsize();
-    size += sizeof(int32_t);
+    // size_t size = 0;
+    // size += sizeof(_type);
+    // size += _stroke->memsize();
+    size_t size = SymShape::memsize();
+    size += sizeof(size_t);
     for (auto& pt : _points) {
         size += pt.memsize();
     }
@@ -80,9 +87,10 @@ size_t SymLineString::memsize() const {
 
 
 char* SymLineString::serialize(char* p) const {
-    SERIALIZE(p, _type);
-    p = _stroke->serialize(p);
-    int32_t npoints = _points.size();
+    // SERIALIZE(p, _type);
+    // p = _stroke->serialize(p);
+    p = SymShape::serialize(p);
+    size_t npoints = _points.size();
     SERIALIZE(p, npoints);
     for (auto& pt : _points) {
         p = pt.serialize(p);
@@ -92,9 +100,10 @@ char* SymLineString::serialize(char* p) const {
 
 char* SymLineString::deserialize(char* data) {
     char* p = data;
-    DESERIALIZE(p, _type);
-    p = _stroke->deserialize(p);
-    int32_t npoints;
+    // DESERIALIZE(p, _type);
+    // p = _stroke->deserialize(p);
+    p = SymShape::deserialize(p);
+    size_t npoints;
     DESERIALIZE(p, npoints);
     _points.clear();
     for (int i = 0; i < npoints; ++i) {

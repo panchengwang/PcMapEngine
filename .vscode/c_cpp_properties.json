@@ -7,9 +7,6 @@
         "../",
         "${default}",
         "${workspaceFolder}",
-        "${workspaceFolder}/canvas/cpp",
-        "${workspaceFolder}/canvas/c",
-        "${workspaceFolder}/symbol/cpp",
         "/usr/include",
         "/usr/include/x86_64-linux-gnu/",
         "/usr/include/opencv4"

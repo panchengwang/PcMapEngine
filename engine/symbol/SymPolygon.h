@@ -6,8 +6,9 @@
 #include <json-c/json.h>
 #include "SymShape.h"
 #include "SymPoint.h"
+#include "SymLineString.h"
 
-class SymPolygon : public SymShape
+class SymPolygon : public SymLineString
 {
     friend class SymCanvas;
 public:
@@ -19,12 +20,11 @@ public:
 
     virtual SymShape* clone() const override;
 
-    const std::vector<SymPoint>& points() const;
     size_t memsize() const override;
     char* serialize(char* p) const override;
     char* deserialize(char* data) override;
 protected:
-    std::vector<SymPoint> _points;
+
 };
 
 

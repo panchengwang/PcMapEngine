@@ -17,10 +17,7 @@ SymRectangle::~SymRectangle() {
 
 
 bool SymRectangle::fromJson(json_object* jsonobj) {
-    if (!SymShape::strokeFromJson(jsonobj)) {
-        return false;
-    }
-    if (!SymShape::fillFromJson(jsonobj)) {
+    if (!SymShape::fromJson(jsonobj)) {
         return false;
     }
 
@@ -35,9 +32,9 @@ bool SymRectangle::fromJson(json_object* jsonobj) {
 
 json_object* SymRectangle::toJson() const {
     json_object* jsonObj = SymShape::toJson();
-    json_object_object_add(jsonObj, "type", json_object_new_string("rectangle"));
-    json_object_object_add(jsonObj, "stroke", _stroke->toJson());
-    json_object_object_add(jsonObj, "fill", _fill->toJson());
+    // json_object_object_add(jsonObj, "type", json_object_new_string("rectangle"));
+    // json_object_object_add(jsonObj, "stroke", _stroke->toJson());
+    // json_object_object_add(jsonObj, "fill", _fill->toJson());
     json_object_object_add(jsonObj, "minx", json_object_new_double(_minX));
     json_object_object_add(jsonObj, "miny", json_object_new_double(_minY));
     json_object_object_add(jsonObj, "maxx", json_object_new_double(_maxX));
@@ -50,6 +47,8 @@ json_object* SymRectangle::toJson() const {
 
 SymShape* SymRectangle::clone() const {
     SymRectangle* c = new SymRectangle();
+    c->_type = _type;
+    c->_offssetAlongLine = _offssetAlongLine;
     c->_stroke = _stroke->clone();
     c->_fill = _fill->clone();
     c->_minX = _minX;
@@ -81,10 +80,7 @@ double SymRectangle::maxY() const
 
 
 size_t SymRectangle::memsize() const {
-    size_t size = 0;
-    size += sizeof(_type);
-    size += _stroke->memsize();
-    size += _fill->memsize();
+    size_t size = SymShape::memsize();
     size += sizeof(_minX);
     size += sizeof(_minY);
     size += sizeof(_maxX);
@@ -96,9 +92,7 @@ size_t SymRectangle::memsize() const {
 
 
 char* SymRectangle::serialize(char* p) const {
-    SERIALIZE(p, _type);
-    p = _stroke->serialize(p);
-    p = _fill->serialize(p);
+    p = SymShape::serialize(p);
     SERIALIZE(p, _minX);
     SERIALIZE(p, _minY);
     SERIALIZE(p, _maxX);
@@ -108,9 +102,7 @@ char* SymRectangle::serialize(char* p) const {
 
 char* SymRectangle::deserialize(char* data) {
     char* p = data;
-    DESERIALIZE(p, _type);
-    p = _stroke->deserialize(p);
-    p = fillDeserialize(p);
+    p = SymShape::deserialize(p);
     DESERIALIZE(p, _minX);
     DESERIALIZE(p, _minY);
     DESERIALIZE(p, _maxX);

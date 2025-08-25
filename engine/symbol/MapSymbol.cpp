@@ -69,6 +69,7 @@ bool MapSymbol::fromJson(json_object* jsonObj) {
     JSON_GET_DOUBLE(jsonObj, "width", _width, _errorMessage);
     JSON_GET_DOUBLE(jsonObj, "height", _height, _errorMessage);
     JSON_GET_DOUBLE(jsonObj, "dotspermm", _dotsPerMM, _errorMessage);
+
     json_object* shapesObj;
     JSON_GET_ARRAY(jsonObj, "shapes", shapesObj, _errorMessage);
 
@@ -251,20 +252,29 @@ char* MapSymbol::imageData(size_t& size) const
   * @brief Get a copy of the cairo surface for the MapSymbol.
   * This function creates a new SymCanvas, draws all shapes onto it, and returns the cairo surface.
   * The caller is responsible for destroying the returned surface using cairo_surface_destroy().
-  * @param includeSystemShape If true, includes system shapes in the output; otherwise, excludes them.
+  * @param withShape Specifies which shapes to include in the surface.
+  * - CREATE_SURFACE_WITH_SYSTEM_LINE: Include system line shapes.
+  * - CREATE_SURFACE_WITH_SYSTEM_FILL: Include system fill shapes.
+  * - CREATE_SURFACE_WITH_ALL_SHAPES: Include all shapes.
   * @return A pointer to the cairo surface containing the drawn shapes.
   * The returned surface is a copy of the original surface used in the SymCanvas.
   * The caller must call cairo_surface_destroy() on the returned surface when it is no longer needed.
   */
-cairo_surface_t* MapSymbol::cairoSurface(bool includeSystemShape) const {
+cairo_surface_t* MapSymbol::cairoSurface(uint8_t withShape) const {
     SymCanvas canvas;
     canvas.set(_width, _height, _dotsPerMM);
     canvas.begin();
     for (size_t i = 0; i < _shapes.size(); i++) {
-        if (!includeSystemShape && (_shapes[i]->type() == SymShape::SYM_SYSTEM_LINE || _shapes[i]->type() == SymShape::SYM_SYSTEM_FILL)) {
-            continue; // Skip system line shapes if not included
+        if ((withShape & CREATE_SURFACE_WITHOUT_SYSTEM_LINE) && _shapes[i]->type() == SymShape::SYM_SYSTEM_LINE) {
+            continue;
         }
+        else if ((withShape & CREATE_SURFACE_WITHOUT_SYSTEM_LINE) && _shapes[i]->type() == SymShape::SYM_SYSTEM_FILL) {
+            continue;
+        }
+
         canvas.draw(_shapes[i]);
+        std::cerr << "draw shape: " << std::endl;
+
     }
     canvas.end();
     return canvas.cairoSurface();
@@ -293,6 +303,7 @@ MapSymbol& MapSymbol::operator=(const MapSymbol& other) {
     clear();
     _width = other._width;
     _height = other._height;
+    _dotsPerMM = other._dotsPerMM;
     for (size_t i = 0; i < other._shapes.size(); i++) {
         _shapes.push_back(other._shapes[i]->clone());
     }
@@ -310,10 +321,11 @@ MapSymbol& MapSymbol::operator=(const MapSymbol& other) {
  */
 size_t MapSymbol::memsize() const {
     size_t size = 0;
-    size += sizeof(_width);
-    size += sizeof(_height);
-    size += sizeof(_dotsPerMM);
-    size += sizeof(int32_t);
+    size += sizeof(double);                     // _width
+    size += sizeof(double);                     // _height
+    size += sizeof(double);                     // _dotsPerMM
+
+    size += sizeof(size_t);
     for (size_t i = 0; i < _shapes.size(); i++) {
         size += _shapes[i]->memsize();
     }
@@ -336,7 +348,8 @@ char* MapSymbol::serialize(size_t& len) const {
     SERIALIZE(p, _width);
     SERIALIZE(p, _height);
     SERIALIZE(p, _dotsPerMM);
-    int32_t nshapes = (int32_t)_shapes.size();
+
+    size_t nshapes = _shapes.size();
     SERIALIZE(p, nshapes);
     for (size_t i = 0; i < _shapes.size(); i++) {
         p = _shapes[i]->serialize(p);
@@ -358,7 +371,8 @@ bool MapSymbol::deserialize(char* data) {
     DESERIALIZE(p, _width);
     DESERIALIZE(p, _height);
     DESERIALIZE(p, _dotsPerMM);
-    int32_t nshapes;
+
+    size_t nshapes;
     DESERIALIZE(p, nshapes);
     clear();
     uint8_t type;
@@ -539,3 +553,5 @@ void MapSymbol::appendShape(SymShape* shape)
         _shapes.push_back(shape);
     }
 }
+
+

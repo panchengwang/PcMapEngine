@@ -13,10 +13,13 @@ SymText::~SymText() {
 }
 
 bool SymText::fromJson(json_object* jsonobj) {
-    if (!SymShape::strokeFromJson(jsonobj)) {
-        return false;
-    }
-    if (!SymShape::fillFromJson(jsonobj)) {
+    // if (!SymShape::strokeFromJson(jsonobj)) {
+    //     return false;
+    // }
+    // if (!SymShape::fillFromJson(jsonobj)) {
+    //     return false;
+    // }
+    if (!SymShape::fromJson(jsonobj)) {
         return false;
     }
 
@@ -65,9 +68,9 @@ bool SymText::fromJson(json_object* jsonobj) {
 
 json_object* SymText::toJson() const {
     json_object* jsonObj = SymShape::toJson();
-    json_object_object_add(jsonObj, "type", json_object_new_string("text"));
-    json_object_object_add(jsonObj, "stroke", _stroke->toJson());
-    json_object_object_add(jsonObj, "fill", _fill->toJson());
+    // json_object_object_add(jsonObj, "type", json_object_new_string("text"));
+    // json_object_object_add(jsonObj, "stroke", _stroke->toJson());
+    // json_object_object_add(jsonObj, "fill", _fill->toJson());
     json_object_object_add(jsonObj, "center", _center.toJson());
     json_object_object_add(jsonObj, "rotation", json_object_new_double(_rotation));
     json_object_object_add(jsonObj, "text", json_object_new_string(_text.c_str()));
@@ -104,6 +107,7 @@ json_object* SymText::toJson() const {
 SymShape* SymText::clone() const {
     SymText* shp = new SymText();
     shp->_type = _type;
+    shp->_offssetAlongLine = _offssetAlongLine;
     shp->_stroke = _stroke->clone();
     shp->_fill = _fill->clone();
     shp->_text = _text;
@@ -117,10 +121,11 @@ SymShape* SymText::clone() const {
 }
 
 size_t SymText::memsize() const {
-    size_t size = 0;
-    size += sizeof(_type);
-    size += _stroke->memsize();
-    size += _fill->memsize();
+    // size_t size = 0;
+    // size += sizeof(_type);
+    // size += _stroke->memsize();
+    // size += _fill->memsize();
+    size_t size = SymShape::memsize();
     // size += sizeof(int);            // for _text length
     size += _text.length() + 1;           // for _text
     size += _center.memsize();          // for _center
@@ -136,9 +141,10 @@ size_t SymText::memsize() const {
 
 
 char* SymText::serialize(char* p) const {
-    SERIALIZE(p, _type);
-    p = _stroke->serialize(p);
-    p = _fill->serialize(p);
+    // SERIALIZE(p, _type);
+    // p = _stroke->serialize(p);
+    // p = _fill->serialize(p);
+    p = SymShape::serialize(p);
     SERIALIZE_STRING(p, _text);
     p = _center.serialize(p);
     SERIALIZE(p, _fontSize);
@@ -153,9 +159,10 @@ char* SymText::serialize(char* p) const {
 
 char* SymText::deserialize(char* data) {
     char* p = data;
-    DESERIALIZE(p, _type);
-    p = _stroke->deserialize(p);
-    p = fillDeserialize(p);
+    // DESERIALIZE(p, _type);
+    // p = _stroke->deserialize(p);
+    // p = fillDeserialize(p);
+    p = SymShape::deserialize(p);
     DESERIALIZE_STRING(p, _text);
     p = _center.deserialize(p);
     DESERIALIZE(p, _fontSize);

@@ -13,7 +13,7 @@ std::transform(str.begin(), str.end(), str.begin(), ::tolower);                 
 
 
 SymStroke::SymStroke() {
-
+    _dashesOffset = 0;
 }
 
 
@@ -77,6 +77,7 @@ bool SymStroke::fromJson(json_object* jsonObj, std::string& errMsg) {
         _dashes.push_back(dash);
     }
 
+    JSON_GET_DOUBLE(jsonObj, "dashesoffset", _dashesOffset, errMsg);
     return true;
 }
 
@@ -116,6 +117,7 @@ json_object* SymStroke::toJson() const {
     }
     json_object_object_add(jsonObj, "dashes", dashesObj);
 
+    json_object_object_add(jsonObj, "dashesoffset", json_object_new_double(_dashesOffset));
     return jsonObj;
 }
 
@@ -128,6 +130,7 @@ SymStroke::SymStroke(const SymStroke& stroke) {
         _dashes.push_back(dash);
     }
     _color = stroke._color;
+    _dashesOffset = stroke._dashesOffset;
 }
 
 SymStroke* SymStroke::clone() const
@@ -143,6 +146,7 @@ size_t SymStroke::memsize() const {
     size += sizeof(_join);
     size += sizeof(size_t);
     size += _dashes.size() * sizeof(double);
+    size += sizeof(_dashesOffset);
     size += _color.memsize();
     return size;
 }
@@ -157,6 +161,7 @@ char* SymStroke::serialize(char* p) const {
     for (auto dash : _dashes) {
         SERIALIZE(p, dash);
     }
+    SERIALIZE(p, _dashesOffset);
     p = _color.serialize(p);
     return p;
 }
@@ -175,6 +180,7 @@ char* SymStroke::deserialize(char* data) {
         DESERIALIZE(p, dash);
         _dashes.push_back(dash);
     }
+    DESERIALIZE(p, _dashesOffset);
     p = _color.deserialize(p);
     return p;
 }
@@ -198,4 +204,8 @@ SymStroke::JoinStyle SymStroke::join() const {
 
 const SymColor& SymStroke::color() const {
     return _color;
+}
+
+double SymStroke::dashesOffset() const {
+    return _dashesOffset;
 }

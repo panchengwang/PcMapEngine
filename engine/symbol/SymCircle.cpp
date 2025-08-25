@@ -12,13 +12,16 @@ SymCircle::~SymCircle() {
 
 
 bool SymCircle::fromJson(json_object* jsonObj) {
+    if (!SymShape::fromJson(jsonObj)) {
+        return false;
+    }
 
-    if (!SymShape::strokeFromJson(jsonObj)) {
-        return false;
-    }
-    if (!SymShape::fillFromJson(jsonObj)) {
-        return false;
-    }
+    // if (!SymShape::strokeFromJson(jsonObj)) {
+    //     return false;
+    // }
+    // if (!SymShape::fillFromJson(jsonObj)) {
+    //     return false;
+    // }
 
     json_object* centerObj;
     if (!json_object_object_get_ex(jsonObj, "center", &centerObj)) {
@@ -37,9 +40,9 @@ bool SymCircle::fromJson(json_object* jsonObj) {
 
 json_object* SymCircle::toJson() const {
     json_object* jsonObj = SymShape::toJson();
-    json_object_object_add(jsonObj, "type", json_object_new_string("circle"));
-    json_object_object_add(jsonObj, "stroke", _stroke->toJson());
-    json_object_object_add(jsonObj, "fill", _fill->toJson());
+    // json_object_object_add(jsonObj, "type", json_object_new_string("circle"));
+    // json_object_object_add(jsonObj, "stroke", _stroke->toJson());
+    // json_object_object_add(jsonObj, "fill", _fill->toJson());
     json_object_object_add(jsonObj, "center", _center.toJson());
     json_object_object_add(jsonObj, "radius", json_object_new_double(_radius));
     return jsonObj;
@@ -47,6 +50,8 @@ json_object* SymCircle::toJson() const {
 
 SymShape* SymCircle::clone() const {
     SymCircle* c = new SymCircle();
+    c->_type = _type;
+    c->_offssetAlongLine = _offssetAlongLine;
     c->_stroke = _stroke->clone();
     c->_fill = _fill->clone();
     c->_center = _center;
@@ -56,19 +61,20 @@ SymShape* SymCircle::clone() const {
 
 
 size_t SymCircle::memsize() const {
-    size_t size = 0;
-    size += sizeof(_type);
-    size += _stroke->memsize();
-    size += _fill->memsize();
+    size_t size = SymShape::memsize();
+    // size += sizeof(_type);
+    // size += _stroke->memsize();
+    // size += _fill->memsize();
     size += _center.memsize();
     size += sizeof(_radius);
     return size;
 }
 
 char* SymCircle::serialize(char* p) const {
-    SERIALIZE(p, _type);
-    p = _stroke->serialize(p);
-    p = _fill->serialize(p);
+    // SERIALIZE(p, _type);
+    // p = _stroke->serialize(p);
+    // p = _fill->serialize(p);
+    p = SymShape::serialize(p);
     p = _center.serialize(p);
     SERIALIZE(p, _radius);
     return p;
@@ -77,9 +83,10 @@ char* SymCircle::serialize(char* p) const {
 
 char* SymCircle::deserialize(char* data) {
     char* p = data;
-    DESERIALIZE(p, _type);
-    p = _stroke->deserialize(p);
-    p = fillDeserialize(p);
+    // DESERIALIZE(p, _type);
+    // p = _stroke->deserialize(p);
+    // p = fillDeserialize(p);
+    p = SymShape::deserialize(p);
     p = _center.deserialize(p);
     DESERIALIZE(p, _radius);
     return p;

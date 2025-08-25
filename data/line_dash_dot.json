@@ -6,11 +6,22 @@
     {
       "type": "systemline",
       "stroke": {
-        "color": [0, 0, 0, 255],
+        "color": [
+          0,
+          0,
+          0,
+          255
+        ],
         "width": 0.5,
         "cap": "butt",
         "join": "miter",
-        "dashes": [2, 2, 0.25, 2]
+        "dashes": [
+          2,
+          2,
+          0.25,
+          2
+        ],
+        "dashesoffset": 0
       }
     }
   ]

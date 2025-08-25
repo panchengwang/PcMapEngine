@@ -6,17 +6,34 @@
     {
       "type": "regularpolygon",
       "stroke": {
-        "color": [0, 0, 0, 255],
+        "color": [
+          0,
+          0,
+          0,
+          255
+        ],
         "width": 1,
         "cap": "round",
         "join": "round",
-        "dashes": [1, 0]
+        "dashes": [
+          1,
+          0
+        ],
+        "dashesoffset": 0
       },
       "fill": {
         "type": "solid",
-        "color": [255, 0, 255, 127]
+        "color": [
+          255,
+          0,
+          255,
+          127
+        ]
       },
-      "center": [0.0, 0.0],
+      "center": [
+        0.0,
+        0.0
+      ],
       "radius": 0.8,
       "sides": 5,
       "rotation": 0

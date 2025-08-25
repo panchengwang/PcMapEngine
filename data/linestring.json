@@ -18,7 +18,8 @@
                 "dashes": [
                     1,
                     0
-                ]
+                ],
+                "dashesoffset": 0
             },
             "points": [
                 [

@@ -31,7 +31,7 @@ public:
     };
 
 
-    virtual size_t memsize() const = 0;
+
 public:
     SymShape();
     virtual ~SymShape();
@@ -41,20 +41,22 @@ public:
 
     virtual bool fromJson(json_object* jsonobj);
     virtual json_object* toJson() const;
-
+    virtual size_t memsize() const;
     virtual SymShape* clone() const = 0;
     const std::string& getErrorMessage() const;
 
     const SymStroke* stroke() const { return _stroke; }
     const SymFill* fill() const { return _fill; }
-    virtual char* serialize(char* p) const = 0;
-    virtual char* deserialize(char* data) = 0;
+    virtual char* serialize(char* p) const;
+    virtual char* deserialize(char* data);
+    const double getOffsetAlongLine() const { return _offssetAlongLine; }
 protected:
     bool strokeFromJson(json_object* jsonobj);
     bool fillFromJson(json_object* jsonobj);
+    bool typeFromJson(json_object* jsonobj);
 
     char* fillDeserialize(char* data);
-
+    char* strokeDeserialize(char* data);
 
 protected:
     uint8_t _type;
@@ -62,6 +64,7 @@ protected:
 
     SymStroke* _stroke;
     SymFill* _fill;
+    double _offssetAlongLine;  // 符号沿线偏移距离，单位毫米
 };
 
 

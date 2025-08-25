@@ -20,11 +20,7 @@ SymRegularPolygon::~SymRegularPolygon() {
 
 
 bool SymRegularPolygon::fromJson(json_object* jsonobj) {
-    if (!SymShape::strokeFromJson(jsonobj)) {
-        return false;
-    }
-
-    if (!SymShape::fillFromJson(jsonobj)) {
+    if (!SymShape::fromJson(jsonobj)) {
         return false;
     }
 
@@ -42,9 +38,9 @@ bool SymRegularPolygon::fromJson(json_object* jsonobj) {
 
 json_object* SymRegularPolygon::toJson() const {
     json_object* jsonObj = SymShape::toJson();
-    json_object_object_add(jsonObj, "type", json_object_new_string("regularpolygon"));
-    json_object_object_add(jsonObj, "stroke", _stroke->toJson());
-    json_object_object_add(jsonObj, "fill", _fill->toJson());
+    // json_object_object_add(jsonObj, "type", json_object_new_string("regularpolygon"));
+    // json_object_object_add(jsonObj, "stroke", _stroke->toJson());
+    // json_object_object_add(jsonObj, "fill", _fill->toJson());
     json_object_object_add(jsonObj, "center", _center.toJson());
     json_object_object_add(jsonObj, "radius", json_object_new_double(_radius));
     json_object_object_add(jsonObj, "sides", json_object_new_int(_sides));
@@ -57,6 +53,7 @@ json_object* SymRegularPolygon::toJson() const {
 SymShape* SymRegularPolygon::clone() const {
     SymRegularPolygon* rpg = new SymRegularPolygon();
     rpg->_type = _type;
+    rpg->_offssetAlongLine = _offssetAlongLine;
     rpg->_stroke = _stroke->clone();
     rpg->_fill = _fill->clone();
     rpg->_center = _center;
@@ -84,10 +81,11 @@ std::vector<SymPoint> SymRegularPolygon::getPoints() const {
 
 
 size_t SymRegularPolygon::memsize() const {
-    size_t size = 0;
-    size += sizeof(_type);
-    size += _stroke->memsize();
-    size += _fill->memsize();
+    // size_t size = 0;
+    // size += sizeof(_type);
+    // size += _stroke->memsize();
+    // size += _fill->memsize();
+    size_t size = SymShape::memsize();
     size += _center.memsize();
     size += sizeof(_radius);
     size += sizeof(_sides);
@@ -97,9 +95,10 @@ size_t SymRegularPolygon::memsize() const {
 
 
 char* SymRegularPolygon::serialize(char* p) const {
-    SERIALIZE(p, _type);
-    p = _stroke->serialize(p);
-    p = _fill->serialize(p);
+    // SERIALIZE(p, _type);
+    // p = _stroke->serialize(p);
+    // p = _fill->serialize(p);
+    p = SymShape::serialize(p);
     p = _center.serialize(p);
     SERIALIZE(p, _radius);
     SERIALIZE(p, _sides);
@@ -110,9 +109,10 @@ char* SymRegularPolygon::serialize(char* p) const {
 
 char* SymRegularPolygon::deserialize(char* data) {
     char* p = data;
-    DESERIALIZE(p, _type);
-    p = _stroke->deserialize(p);
-    p = fillDeserialize(p);
+    // DESERIALIZE(p, _type);
+    // p = _stroke->deserialize(p);
+    // p = fillDeserialize(p);
+    p = SymShape::deserialize(p);
     p = _center.deserialize(p);
     DESERIALIZE(p, _radius);
     DESERIALIZE(p, _sides);

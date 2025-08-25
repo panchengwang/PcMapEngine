@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
     if (!symbol.fromJsonFile(filename.c_str())) {
         std::cerr << symbol.getErrorMessage() << std::endl;
     }
-    // std::cerr << symbol.toJson() << std::endl;
+
 
     // size_t memsize = symbol.memsize();
     std::cerr << "memsize: " << symbol.memsize() << std::endl;
@@ -49,6 +49,7 @@ int main(int argc, char** argv) {
         std::cerr << sym2.getErrorMessage() << std::endl;
         return -1;
     }
+    // std::cerr << sym2.toJson() << std::endl;
     std::cerr << "ok..." << std::endl;
     char* data = sym2.imageData(len);
     fwrite(data, len, 1, stdout);

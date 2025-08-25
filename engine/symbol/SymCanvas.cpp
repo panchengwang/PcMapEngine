@@ -126,7 +126,8 @@ void SymCanvas::setStrokeStyle(SymShape* shp) {
     for (auto& dash : dashes) {
         dash *= _dotsPerMM;
     }
-    cairo_set_dash(_canvas, dashes.data(), dashes.size(), 0);
+    cairo_set_dash(_canvas, dashes.data(), dashes.size(), shp->_stroke->_dashesOffset * _dotsPerMM);
+    // cairo_set_dash(_canvas, dashes.data(), dashes.size(), 0);
 
 }
 

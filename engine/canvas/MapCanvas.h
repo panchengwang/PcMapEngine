@@ -58,7 +58,7 @@ protected:
     std::string createUUID();
     geos::geom::Geometry::Ptr mapToCanvas(const geos::geom::Geometry* geom);
     void initDefaultSymbols();
-    std::vector<geos::geom::Coordinate> getEvenlySpacedPoints(const geos::geom::LineString* line, double spacing);
+    std::vector<geos::geom::Coordinate> getEvenlySpacedPoints(const geos::geom::LineString* line, double spacing, double offsetAlongLine = 0);
 
 private:
 

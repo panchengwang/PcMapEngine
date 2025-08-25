@@ -6,35 +6,69 @@
     {
       "type": "circle",
       "stroke": {
-        "color": [0, 0, 0, 255],
+        "color": [
+          0,
+          0,
+          0,
+          255
+        ],
         "width": 2,
         "cap": "butt",
         "join": "miter",
-        "dashes": [2, 0]
+        "dashes": [
+          2,
+          0
+        ],
+        "dashesoffset": 0
       },
       "fill": {
         "type": "solid",
-        "color": [255, 255, 0, 0]
+        "color": [
+          255,
+          255,
+          0,
+          0
+        ]
       },
-      "center": [0.0, 0.0],
+      "center": [
+        0.0,
+        0.0
+      ],
       "radius": 0.8
     },
     {
       "type": "text",
       "stroke": {
-        "color": [0, 0, 0, 255],
+        "color": [
+          0,
+          0,
+          0,
+          255
+        ],
         "width": 0.2,
         "cap": "butt",
         "join": "miter",
-        "dashes": [2, 0]
+        "dashes": [
+          2,
+          0
+        ],
+        "dashesoffset": 0
       },
       "fill": {
         "type": "solid",
-        "color": [255, 0, 0, 255]
+        "color": [
+          255,
+          0,
+          0,
+          255
+        ]
       },
       "text": "四",
-      "center": [0.0, 0.0],
-      "fontsize": 0.7,
+      "center": [
+        0.0,
+        0.0
+      ],
+      "fontsize": 0.55,
       "rotation": 0,
       "fontname": "Noto Sans CJK SC",
       "outlined": true,

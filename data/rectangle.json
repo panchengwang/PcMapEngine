@@ -6,15 +6,29 @@
     {
       "type": "rectangle",
       "stroke": {
-        "color": [0, 0, 0, 255],
+        "color": [
+          0,
+          0,
+          0,
+          255
+        ],
         "width": 0.1,
         "cap": "round",
         "join": "miter",
-        "dashes": [1, 0]
+        "dashes": [
+          1,
+          0
+        ],
+        "dashesoffset": 0
       },
       "fill": {
         "type": "solid",
-        "color": [127, 127, 0, 255]
+        "color": [
+          127,
+          127,
+          0,
+          255
+        ]
       },
       "minx": -0.8,
       "maxx": 0.8,

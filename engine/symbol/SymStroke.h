@@ -45,6 +45,7 @@ public:
     CapStyle cap() const;
     JoinStyle join() const;
     const SymColor& color() const;
+    double dashesOffset() const;
 
 protected:
     CapStyle _cap;
@@ -52,6 +53,7 @@ protected:
     std::vector<double> _dashes;
     SymColor _color;
     double _width;
+    double _dashesOffset; // Offset for dashes, default is 0
 
 };
 

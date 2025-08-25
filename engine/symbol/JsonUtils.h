@@ -32,6 +32,20 @@
         val = json_object_get_double(myobj);                                                                            \
     }
 
+#define JSON_GET_DOUBLE_WITH_DEFAULT(obj, name, val, errMsg, defaultval)                                                \
+    {                                                                                                                   \
+        json_object* myobj;                                                                                             \
+        if (!json_object_object_get_ex(obj, name, &myobj)) {                                                            \
+            val = defaultval;                                                                                           \
+        }else{                                                                                                          \
+            if (json_object_get_type(myobj) != json_type_double && json_object_get_type(myobj) != json_type_int) {      \
+                errMsg = std::string("Invalid type for field: ") + name + " (double)";                                  \
+                return false;                                                                                           \
+            }                                                                                                           \
+            val = json_object_get_double(myobj);                                                                        \
+        }                                                                                                               \
+    }
+
 #define JSON_GET_INT(obj, name, val, errMsg)                                                                            \
     {                                                                                                                   \
         json_object* myobj;                                                                                             \
