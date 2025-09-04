@@ -13,7 +13,10 @@
 #include <filesystem>
 #include <opencv4/opencv2/opencv.hpp>
 #include <geos/geom/util/GeometryEditor.h>
+#include "AngleUtil.h"
 #include "AffineTransformer.h"
+#include <geos/simplify/DouglasPeuckerSimplifier.h>
+#include <geos/simplify/TopologyPreservingSimplifier.h>
 
 MapCanvas::MapCanvas() {
     _dotsPerMM = 96.0 / 25.4;
@@ -128,34 +131,68 @@ void MapCanvas::initDefaultSymbols() {
     //       }]
     // })");
 
-    _defaultLineSymbol.fromJson(R"({
-        "width": 15.0,
-        "height": 15.0,
+    if (!_defaultLineSymbol.fromJson(R"({
+        "width": 25.0,
+        "height": 25.0,
         "dotspermm": 3.7795275590551185,
         
         "shapes": [{
             "type": "systemline",
             "stroke": {
                 "color": [0, 0, 0, 255],
-                "width": 0.5,
+                "width": 0.1,
                 "cap": "butt",
                 "join": "miter",
-                "dashes": [10,5],
+                "dashes": [10,15],
                 "dashesoffset": 0
             }
         },{
-            "type": "systemline",
+            "type": "linestring",
             "stroke": {
                 "color": [0, 0, 0, 255],
-                "width": 3,
+                "width": 0.3,
                 "cap": "butt",
                 "join": "miter",
-                "dashes": [0.3,9.7,0.3,4.7],
+                "dashes": [10,0],
                 "dashesoffset": 0
-            }
+            },
+            "offsetalongline": 10,
+            "points":[[0, -0.05], [0, 0.05]]
+        },{
+            "type": "linestring",
+            "stroke": {
+                "color": [0, 0, 0, 255],
+                "width": 0.3,
+                "cap": "butt",
+                "join": "miter",
+                "dashes": [10,0],
+                "dashesoffset": 0
+            },
+            "offsetalongline": 25,
+            "points":[[0, -0.05], [0, 0.05]]
+        },{
+            "type": "star",
+            "offsetalongline": 13.5,
+            "stroke": {
+              "color": [0, 0, 0, 255],
+              "width": 0.1,
+              "cap": "round",
+              "join": "round",
+              "dashes": [1, 0],
+              "dashesoffset": 0
+            },
+            "fill": {
+              "type": "solid",
+              "color": [255, 255, 0, 127]
+            },
+            "center": [0.0, 0.0],
+            "radius": 0.07,
+            "radius2": 0.2,
+            "sides": 5,
+            "rotation": 0
         },{
             "type": "regularpolygon",
-            "offsetalongline": 11.5,
+            "offsetalongline": 20.5,
             "stroke": {
               "color": [0, 0, 0, 255],
               "width": 0.1,
@@ -172,27 +209,11 @@ void MapCanvas::initDefaultSymbols() {
             "radius": 0.1,
             "sides": 12,
             "rotation": 45
-        },{
-            "type": "regularpolygon",
-            "offsetalongline": 13.5,
-            "stroke": {
-              "color": [0, 0, 0, 255],
-              "width": 0.1,
-              "cap": "round",
-              "join": "round",
-              "dashes": [1, 0],
-              "dashesoffset": 0
-            },
-            "fill": {
-              "type": "solid",
-              "color": [255, 0, 255, 255]
-            },
-            "center": [0.0, 0.0],
-            "radius": 0.1,
-            "sides": 12,
-            "rotation": 45
         }]
-    })");
+    })")) {
+        std::cerr << "Failed to parse default line symbol." << _defaultLineSymbol.getErrorMessage() << std::endl;
+        exit(1);
+    }
 
 
 }
@@ -577,6 +598,74 @@ std::vector<geos::geom::Coordinate>  MapCanvas::getEvenlySpacedPoints(const Line
     return points;
 }
 
+
+std::vector<geos::geom::Coordinate> MapCanvas::getEvenlySpacedPointsEx(const geos::geom::LineString* line, double spacing, std::vector<double>& rotationAngles, double offsetAlongLine) {
+    std::vector<geos::geom::Coordinate> points;
+
+    if (!line || line->getNumPoints() < 2) return points;
+
+    double totalLength = line->getLength();
+    if (totalLength < spacing) {
+        return points;
+    }
+    double remainLength = totalLength;
+    double remainSpacing = offsetAlongLine; // spacing * 0.5; // 从半个间距开始，这样可以避免在起点处绘制符号
+    size_t i = 0;
+    size_t npoints = line->getNumPoints();
+
+    geos::geom::Coordinate startCoord = line->getCoordinateN(i);
+    geos::geom::Coordinate endCoord;
+    double ratio;
+    while (remainLength >= 0) {
+        if (i >= npoints - 1) {
+            break; // 如果已经到达最后一个点，退出循环
+        }
+        endCoord = line->getCoordinateN(i + 1);
+        double segmentLength = startCoord.distance(endCoord);
+        if (segmentLength < remainSpacing) {
+            // remainLength -= segmentLength;
+            remainSpacing -= segmentLength;
+            startCoord = endCoord;
+            i++;
+            continue; // 如果当前段长度小于间距，跳过到下一个点
+        }
+        // 计算当前段的比例
+        ratio = remainSpacing / segmentLength;
+
+        // 计算插值点的坐标
+        if (ratio > 1.0) {
+            ratio = 1.0; // 确保比例不超过1
+        }
+        geos::geom::Coordinate coord;
+        coord.x = startCoord.x + (endCoord.x - startCoord.x) * ratio;
+        coord.y = startCoord.y + (endCoord.y - startCoord.y) * ratio;
+
+        points.push_back(coord);
+        // 更新起点为当前插值点
+        startCoord = coord;
+        // 更新剩余长度
+        remainLength -= spacing;
+
+        // 计算旋转角度
+        geos::geom::Coordinate pt1 = startCoord;
+        geos::geom::Coordinate pt2 = coord;
+        geos::geom::Coordinate pt3 = endCoord;
+        if (1.0 - ratio <= 0.000000001 && i + 2 < npoints) {
+            pt3 = line->getCoordinateN(i + 2);
+        }
+        double angle = AngleUtil::angleBisectorDirection(
+            Eigen::Vector2d(pt1.x, pt1.y),
+            Eigen::Vector2d(pt2.x, pt2.y),
+            Eigen::Vector2d(pt3.x, pt3.y)
+        );
+        rotationAngles.push_back(AngleUtil::normalizeAngle(angle));
+
+        remainSpacing = spacing;
+    }
+
+    return points;
+}
+
 void MapCanvas::draw(const geos::geom::LineString* geom, SymSystemLine* symshp) {
     if (!geom || geom->isEmpty()) return;
 
@@ -592,28 +681,84 @@ void MapCanvas::draw(const geos::geom::LineString* geom, SymSystemLine* symshp) 
     cairo_stroke(_cairo);
     cairo_restore(_cairo);
 
-    // _defaultLineSymbol.setDotsPerMM(_dotsPerMM);
-    // cairo_surface_t* symsurface = _defaultLineSymbol.cairoSurface(false);
-    // double symwidth = _defaultLineSymbol.getWidth() * _defaultLineSymbol.getDotsPerMM();
-    // double symheight = _defaultLineSymbol.getHeight() * _defaultLineSymbol.getDotsPerMM();
-    // cairo_save(_cairo);
-    // cairo_set_source_surface(_cairo, symsurface, geom->getX() - symwidth * 0.5, geom->getY() - symheight * 0.5);
-    // cairo_rectangle(_cairo, geom->getX() - symwidth * 0.5, geom->getY() - symheight * 0.5, symwidth, symheight);
-    // cairo_clip(_cairo);
-    // cairo_paint(_cairo);
-    // cairo_restore(_cairo);
-    // cairo_surface_destroy(symsurface);
+
 }
+
+
+
+static std::unique_ptr<geos::geom::CoordinateSequence> removeDuplicateCoords(const geos::geom::CoordinateSequence* coords) {
+    if (!coords || coords->size() == 0) {
+        return nullptr;
+    }
+    std::cerr << "removeDuplicateCoords before: " << coords->size() << std::endl;
+    std::vector<geos::geom::Coordinate> uniqueCoords;
+    uniqueCoords.push_back(coords->getAt(0));
+
+    size_t previous = 0;
+    for (std::size_t i = 1; i < coords->size(); ++i) {
+        // std::cerr << "distance: " << coords->getAt(previous).distance(coords->getAt(i)) << std::endl;
+        if (coords->getAt(previous).distance(coords->getAt(i)) > 1.414214) {
+            uniqueCoords.push_back(coords->getAt(i));
+            previous = i;
+        }
+        // if (!current.equals2D(previous)) {            
+        // }
+    }
+
+    auto result = std::make_unique<geos::geom::CoordinateSequence>();
+    for (const auto& coord : uniqueCoords) {
+        result->add(coord);
+    }
+    std::cerr << "removeDuplicateCoords after: " << result->size() << std::endl;
+    return result;
+}
+
+
+static std::unique_ptr<geos::geom::LineString> removeDuplicatePointsFromLineString(const geos::geom::LineString* line) {
+    if (!line || line->isEmpty()) {
+        return nullptr;
+    }
+
+    auto uniqueCoords = removeDuplicateCoords(line->getCoordinatesRO());
+    if (!uniqueCoords || uniqueCoords->size() < 2) {
+        return nullptr;
+    }
+
+    const geos::geom::GeometryFactory* factory = line->getFactory();
+    return factory->createLineString(std::move(uniqueCoords));
+}
+
+// 处理 LinearRing
+static std::unique_ptr<geos::geom::LinearRing> removeDuplicatePointsFromLinearRing(const geos::geom::LinearRing* ring) {
+    if (!ring || ring->isEmpty()) {
+        return nullptr;
+    }
+
+    auto uniqueCoords = removeDuplicateCoords(ring->getCoordinatesRO());
+    if (!uniqueCoords || uniqueCoords->size() < 4) {
+        return nullptr; // LinearRing 需要至少4个点
+    }
+
+    const geos::geom::GeometryFactory* factory = ring->getFactory();
+    return factory->createLinearRing(std::move(uniqueCoords));
+}
+
 
 void MapCanvas::draw(const geos::geom::LineString* geom, MapSymbol* symbol) {
     if (!geom || geom->isEmpty()) return;
+
+    // std::unique_ptr<geos::geom::LineString> mygeo = removeDuplicatePointsFromLineString(geom);
+    // std::unique_ptr<geom::CoordinateSequence>  = DouglasPeuckerLineSimplifier::simplify(geom);
+    std::unique_ptr< geos::geom::Geometry> mygeo = geos::simplify::DouglasPeuckerSimplifier::simplify(geom, 1);
+    // std::unique_ptr< geos::geom::Geometry> mygeo = geos::simplify::TopologyPreservingSimplifier::simplify(geom, 1);
+    geos::geom::LineString* mylinestring = dynamic_cast<geos::geom::LineString*>(mygeo.get());
     MapSymbol* mysym = symbol ? symbol : &_defaultLineSymbol;
     mysym->setDotsPerMM(_dotsPerMM);
     size_t nsymshp = mysym->getShapeCount();
     for (int i = 0; i < nsymshp; ++i) {
         const SymShape* shp = mysym->getShape(i);
         if (shp->type() == SymShape::SYM_SYSTEM_LINE) {
-            draw(geom, (SymSystemLine*)shp);
+            draw(mylinestring, (SymSystemLine*)shp);
         }
     }
 
@@ -621,15 +766,32 @@ void MapCanvas::draw(const geos::geom::LineString* geom, MapSymbol* symbol) {
     std::vector<MapSymbol*> symbols = mysym->extract();
 
     for (const auto& sym : symbols) {
+        if (sym->getShape(0)->type() == SymShape::SYM_SYSTEM_LINE || sym->getShape(0)->type() == SymShape::SYM_SYSTEM_FILL) {
+            continue;
+        }
+        std::vector<double> rotateAngles;
+        std::vector<geos::geom::Coordinate> points = getEvenlySpacedPointsEx(mylinestring, sym->getWidth() * _dotsPerMM, rotateAngles, sym->getShape(0)->getOffsetAlongLine() * _dotsPerMM);
 
-        std::vector<geos::geom::Coordinate> points = getEvenlySpacedPoints(geom, sym->getWidth() * _dotsPerMM, sym->getShape(0)->getOffsetAlongLine() * _dotsPerMM);
+        // for (double angle : rotateAngles) {
+        //     std::cerr << "rotate angle: " << AngleUtil::radianToDegree(angle) << ", " << angle << std::endl;
+        // }
+
+
         cairo_surface_t* symsurface = sym->cairoSurface(CREATE_SURFACE_WITHOUT_SYSTEM_LINE | CREATE_SURFACE_WITHOUT_SYSTEM_FILL);
         double symwidth = sym->getWidth() * sym->getDotsPerMM();
         double symheight = sym->getHeight() * sym->getDotsPerMM();
-        for (const auto& point : points) {
+        for (size_t i = 0; i < points.size(); ++i) {
+            const geos::geom::Coordinate& point = points[i];
             cairo_save(_cairo);
-            cairo_set_source_surface(_cairo, symsurface, point.x - symwidth * 0.5, point.y - symheight * 0.5);
-            cairo_rectangle(_cairo, point.x - symwidth * 0.5, point.y - symheight * 0.5, symwidth, symheight);
+            // cairo_set_source_surface(_cairo, symsurface, point.x - symwidth * 0.5, point.y - symheight * 0.5);
+            // cairo_rectangle(_cairo, point.x - symwidth * 0.5, point.y - symheight * 0.5, symwidth, symheight);
+            // cairo_clip(_cairo);
+            // cairo_paint(_cairo);
+            cairo_translate(_cairo, point.x, point.y);
+            cairo_scale(_cairo, 1, -1);
+            cairo_rotate(_cairo, 2 * M_PI - rotateAngles[i]);
+            cairo_set_source_surface(_cairo, symsurface, -symwidth * 0.5, -symheight * 0.5);
+            cairo_rectangle(_cairo, -symwidth * 0.5, -symheight * 0.5, symwidth, symheight);
             cairo_clip(_cairo);
             cairo_paint(_cairo);
             cairo_restore(_cairo);
@@ -664,11 +826,83 @@ void MapCanvas::draw(const geos::geom::LineString* geom, MapSymbol* symbol) {
 }
 
 void MapCanvas::draw(const geos::geom::Polygon* geom, MapSymbol* symbol, MapSymbol* fillSymbol) {
-    std::cerr << "draw polygon" << std::endl;
+    // std::cerr << "draw polygon" << std::endl;
+    MapSymbol* sym = fillSymbol ? fillSymbol : &_defaultPointSymbol;
+    cairo_save(_cairo);
+    const geos::geom::CoordinateSequence* coords = geom->getExteriorRing()->getCoordinatesRO();
+    if (coords->size() < 3) {
+        return;
+    }
+    cairo_new_path(_cairo);
+    for (int i = 0; i < coords->size(); ++i) {
+        const geos::geom::Coordinate& point = coords->getAt(i);
+        if (i == 0) cairo_move_to(_cairo, point.x, point.y);
+        else cairo_line_to(_cairo, point.x, point.y);
+    }
+    cairo_close_path(_cairo);
+    cairo_clip(_cairo);
+
+    cairo_surface_t* symsurface = sym->cairoSurface();
+
+    cairo_set_source_surface(_cairo, symsurface, 0, 0);
+    cairo_paint(_cairo);
+    cairo_restore(_cairo);
+
+    cairo_surface_destroy(symsurface);
+    symsurface = NULL;
+
+}
+
+void MapCanvas::draw(const geos::geom::MultiPoint* geom, MapSymbol* symbol) {
+    // std::cerr << "draw multipoint" << std::endl;
+    for (size_t i = 0; i < geom->getNumGeometries(); ++i) {
+        const geos::geom::Point* pt = dynamic_cast<const geos::geom::Point*>(geom->getGeometryN(i));
+        if (pt) draw(pt, symbol);
+    }
+}
+
+void MapCanvas::draw(const geos::geom::MultiLineString* geom, MapSymbol* symbol) {
+    // std::cerr << "draw multilinestring" << std::endl;
+    for (size_t i = 0; i < geom->getNumGeometries(); ++i) {
+        const geos::geom::LineString* line = dynamic_cast<const geos::geom::LineString*>(geom->getGeometryN(i));
+        if (line) draw(line, symbol);
+    }
+}
+
+void MapCanvas::draw(const geos::geom::MultiPolygon* geom, MapSymbol* symbol, MapSymbol* fillSymbol) {
+    // std::cerr << "draw multipolygon" << std::endl;
+    for (size_t i = 0; i < geom->getNumGeometries(); ++i) {
+        const geos::geom::Polygon* poly = dynamic_cast<const geos::geom::Polygon*>(geom->getGeometryN(i));
+        if (poly) draw(poly, symbol, fillSymbol);
+    }
 }
 
 void MapCanvas::draw(const geos::geom::GeometryCollection* geom, MapSymbol* symbol, MapSymbol* fillSymbol) {
-    std::cerr << "draw geometrycollection" << std::endl;
+    // std::cerr << "draw geometrycollection" << std::endl;
+    for (size_t i = 0; i < geom->getNumGeometries(); ++i) {
+        const geos::geom::Geometry* g = geom->getGeometryN(i);
+        if (g->getGeometryTypeId() == geos::geom::GEOS_POINT) {
+            draw((geos::geom::Point*)g, symbol);
+        }
+        else if (g->getGeometryTypeId() == geos::geom::GEOS_LINESTRING) {
+            draw((geos::geom::LineString*)g, symbol);
+        }
+        else if (g->getGeometryTypeId() == geos::geom::GEOS_POLYGON) {
+            draw((geos::geom::Polygon*)g, symbol, fillSymbol);
+        }
+        else if (g->getGeometryTypeId() == geos::geom::GEOS_MULTIPOINT) {
+            draw((geos::geom::MultiPoint*)g, symbol);
+        }
+        else if (g->getGeometryTypeId() == geos::geom::GEOS_MULTILINESTRING) {
+            draw((geos::geom::MultiLineString*)g, symbol);
+        }
+        else if (g->getGeometryTypeId() == geos::geom::GEOS_MULTIPOLYGON) {
+            draw((geos::geom::MultiPolygon*)g, symbol, fillSymbol);
+        }
+        else if (g->getGeometryTypeId() == geos::geom::GEOS_GEOMETRYCOLLECTION) {
+            draw((geos::geom::GeometryCollection*)g, symbol, fillSymbol);
+        }
+    }
 }
 
 

@@ -89,12 +89,14 @@ list(APPEND CANVAS_HEADERS
   canvas/MapCanvas.h
   canvas/AffineTransformer.h
   canvas/AffineTransformOperation.h
+  canvas/AngleUtil.h
 )
 
 list(APPEND CANVAS_SOURCES 
   canvas/MapCanvas.cpp
   canvas/AffineTransformer.cpp
   canvas/AffineTransformOperation.cpp
+  canvas/AngleUtil.cpp
 )
 
 set(HEADERS ${SYMBOL_HEADERS} ${CANVAS_HEADERS})

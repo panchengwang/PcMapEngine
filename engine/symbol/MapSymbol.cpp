@@ -272,6 +272,7 @@ cairo_surface_t* MapSymbol::cairoSurface(uint8_t withShape) const {
             continue;
         }
 
+
         canvas.draw(_shapes[i]);
         std::cerr << "draw shape: " << std::endl;
 

@@ -1,0 +1,49 @@
+{
+  "width": 10.0,
+  "height": 10.0,
+  "dotspermm": 3.7795275590551185,
+  "shapes": [
+    {
+      "type": "systemline",
+      "stroke": {
+        "color": [0, 0, 0, 255],
+        "width": 2,
+        "cap": "butt",
+        "join": "miter",
+        "dashes": [4, 0],
+        "dashesoffset": 0
+      }
+    },
+    {
+      "type": "systemline",
+      "stroke": {
+        "color": [255, 255, 255, 255],
+        "width": 1.5,
+        "cap": "butt",
+        "join": "miter",
+        "dashes": [4, 0],
+        "dashesoffset": 0
+      }
+    },
+    {
+      "type": "regularpolygon",
+      "offsetalongline": 7,
+      "stroke": {
+        "color": [0, 0, 0, 255],
+        "width": 0,
+        "cap": "round",
+        "join": "round",
+        "dashes": [1, 0],
+        "dashesoffset": 0
+      },
+      "fill": {
+        "type": "solid",
+        "color": [255, 0, 0, 255]
+      },
+      "center": [0.0, 0.0],
+      "radius": 0.2,
+      "sides": 3,
+      "rotation": 45
+    }
+  ]
+}

@@ -38,11 +38,12 @@ public:
 
     void draw(const geos::geom::Geometry* geom, MapSymbol* symbol = nullptr, MapSymbol* fillSymbol = nullptr);
     void draw(const geos::geom::Point* geom, MapSymbol* symbol = nullptr);
-
     void draw(const geos::geom::LineString* geom, MapSymbol* symbol = nullptr);
     void draw(const geos::geom::LineString* geom, SymSystemLine* symshp);
-
     void draw(const geos::geom::Polygon* geom, MapSymbol* symbol = nullptr, MapSymbol* fillSymbol = nullptr);
+    void draw(const geos::geom::MultiPoint* geom, MapSymbol* symbol = nullptr);
+    void draw(const geos::geom::MultiLineString* geom, MapSymbol* symbol = nullptr);
+    void draw(const geos::geom::MultiPolygon* geom, MapSymbol* symbol = nullptr, MapSymbol* fillSymbol = nullptr);
     void draw(const geos::geom::GeometryCollection* geom, MapSymbol* symbol = nullptr, MapSymbol* fillSymbol = nullptr);
 
     void draw(const std::string& wkt, MapSymbol* symbol = nullptr, MapSymbol* fillSymbol = nullptr);
@@ -59,6 +60,7 @@ protected:
     geos::geom::Geometry::Ptr mapToCanvas(const geos::geom::Geometry* geom);
     void initDefaultSymbols();
     std::vector<geos::geom::Coordinate> getEvenlySpacedPoints(const geos::geom::LineString* line, double spacing, double offsetAlongLine = 0);
+    std::vector<geos::geom::Coordinate> getEvenlySpacedPointsEx(const geos::geom::LineString* line, double spacing, std::vector<double>& rotationAngles, double offsetAlongLine = 0);
 
 private:
 
